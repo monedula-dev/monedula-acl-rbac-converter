@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    # Action-pinning policy: third-party actions are SHA-pinned (SLSA L2+
+    # supply-chain guidance — comments below carry the human-readable tag
+    # for dependabot). First-party `actions/*` are pinned to major version
+    # tags managed by dependabot; GitHub-org-owned actions are part of the
+    # trust base for any workflow on the platform, so additional SHA-pinning
+    # there is defence-against-self.
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.26.x'
+          cache: true
+      - run: go run ./tools/sync-schemas
+      - run: git diff --exit-code
+      - name: Validate JSON Schemas
+        if: runner.os == 'Linux'
+        run: go run ./tools/validate-schemas
+      - run: go vet ./...
+      - name: golangci-lint
+        if: runner.os == 'Linux'
+        # Third-party action pinned to commit SHA per SLSA L2+ guidance.
+        # Comment records the human-readable tag for dependabot to bump.
+        uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee  # v9.2.1
+        with:
+          # golangci-lint-action v7 is required for golangci-lint v2.x.
+          # Keep `version` in sync with .pre-commit-config.yaml's
+          # golangci-lint repo `rev:`.
+          version: v2.12.2
+          # `goinstall` compiles the linter with the project's Go
+          # toolchain (1.26.x via setup-go above) rather than pulling
+          # a precompiled binary. Avoids the
+          #   "Go language version used to build golangci-lint is
+          #    lower than the targeted Go version"
+          # failure when the prebuilt artifact was compiled with an
+          # older Go than go.mod's directive.
+          install-mode: goinstall
+      - run: go test -race -count=1 ./...
+      - run: go test -race -count=1 -tags e2e ./tests/e2e/...
+      - run: go build ./...
+      - name: Coverage
+        if: runner.os == 'Linux'
+        run: |
+          set -euo pipefail
+          go test -coverprofile=coverage.out -covermode=atomic ./...
+          total_line=$(go tool cover -func=coverage.out | tail -1)
+          echo "$total_line"
+          pct=$(echo "$total_line" | awk '{gsub(/%/, "", $NF); print $NF}')
+          # Floor is set well below the current actual (~75%) to leave
+          # room for inevitable wobbles when adding new code that
+          # hasn't been tested yet on the same PR. Bump in lockstep
+          # with realistic gains; the previous setting was 60% but
+          # the targeted-coverage pass landed several packages above
+          # 70% so we can afford to hold a higher line.
+          floor=70
+          # Compare via awk's exit code directly. awk's BEGIN block exits 0
+          # iff pct < floor (the script inverts with `!`), so we can branch
+          # on awk's exit status without wrapping it in a $(...) capture +
+          # `&& echo yes || echo no` string compare — the older idiom
+          # silently swallowed awk's failure mode (binary missing, malformed
+          # pct) as "not below floor" under set -euo pipefail.
+          if awk -v p="$pct" -v f="$floor" 'BEGIN { exit !(p+0 < f+0) }'; then
+            echo "::error::coverage $pct% is below the $floor% floor"
+            exit 1
+          fi
+      - name: Short fuzz pass
+        if: runner.os == 'Linux'
+        run: |
+          go test -run=^$ -fuzz=FuzzText -fuzztime=30s ./pkg/aclrbac/extract/text/
+          go test -run=^$ -fuzz=FuzzCSV -fuzztime=30s ./pkg/aclrbac/extract/csv/
+      - name: Upload coverage artifact
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: coverage.out
+      - name: Validate goreleaser config
+        if: runner.os == 'Linux'
+        # Third-party action pinned to commit SHA per SLSA L2+ guidance.
+        # Comment records the human-readable tag for dependabot to bump.
+        uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89  # v7.2.2
+        with:
+          distribution: goreleaser
+          version: '~> v2'
+          args: check

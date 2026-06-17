@@ -1,0 +1,108 @@
+{
+  "acls": [
+    {
+      "host": "*",
+      "id": 1,
+      "operation": "Read",
+      "pattern_type": "LITERAL",
+      "permission_type": "Allow",
+      "principal": "User:alice",
+      "resource_name": "orders",
+      "resource_type": "Topic"
+    },
+    {
+      "host": "*",
+      "id": 2,
+      "operation": "Describe",
+      "pattern_type": "LITERAL",
+      "permission_type": "Allow",
+      "principal": "User:alice",
+      "resource_name": "orders",
+      "resource_type": "Topic"
+    },
+    {
+      "host": "*",
+      "id": 3,
+      "operation": "Write",
+      "pattern_type": "LITERAL",
+      "permission_type": "Allow",
+      "principal": "User:bob",
+      "resource_name": "orders",
+      "resource_type": "Topic"
+    },
+    {
+      "host": "*",
+      "id": 4,
+      "operation": "Describe",
+      "pattern_type": "LITERAL",
+      "permission_type": "Allow",
+      "principal": "User:bob",
+      "resource_name": "orders",
+      "resource_type": "Topic"
+    },
+    {
+      "host": "*",
+      "id": 5,
+      "operation": "Read",
+      "pattern_type": "PREFIXED",
+      "permission_type": "Allow",
+      "principal": "User:billing-svc",
+      "resource_name": "billing-",
+      "resource_type": "Topic"
+    },
+    {
+      "host": "*",
+      "id": 6,
+      "operation": "Write",
+      "pattern_type": "PREFIXED",
+      "permission_type": "Allow",
+      "principal": "User:billing-svc",
+      "resource_name": "billing-",
+      "resource_type": "Topic"
+    },
+    {
+      "host": "*",
+      "id": 7,
+      "operation": "Describe",
+      "pattern_type": "PREFIXED",
+      "permission_type": "Allow",
+      "principal": "User:billing-svc",
+      "resource_name": "billing-",
+      "resource_type": "Topic"
+    },
+    {
+      "host": "*",
+      "id": 8,
+      "operation": "Read",
+      "pattern_type": "LITERAL",
+      "permission_type": "Allow",
+      "principal": "User:alice",
+      "resource_name": "orders-consumer",
+      "resource_type": "Group"
+    },
+    {
+      "host": "*",
+      "id": 9,
+      "operation": "Describe",
+      "pattern_type": "LITERAL",
+      "permission_type": "Allow",
+      "principal": "User:alice",
+      "resource_name": "orders-consumer",
+      "resource_type": "Group"
+    },
+    {
+      "host": "*",
+      "id": 10,
+      "operation": "All",
+      "pattern_type": "LITERAL",
+      "permission_type": "Allow",
+      "principal": "User:admin",
+      "resource_name": "kafka-cluster",
+      "resource_type": "Cluster"
+    }
+  ],
+  "schema_version": "1",
+  "source": {
+    "type": "csv"
+  }
+}

@@ -1,0 +1,50 @@
+# Dependabot configuration for monedula-acl-rbac.
+#
+# - Go modules: weekly. franz-go and client-go release frequently and
+#   ship multiple sibling modules each release; group those so we get
+#   one PR per upstream release instead of 4-5 PRs of the same bump.
+# - GitHub Actions: weekly. The workflows pin actions/checkout and
+#   actions/setup-go; auto-bump them so security patches land without
+#   manual nags.
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "go"
+    groups:
+      franz-go:
+        patterns:
+          - "github.com/twmb/franz-go"
+          - "github.com/twmb/franz-go/*"
+      kubernetes:
+        patterns:
+          - "k8s.io/*"
+          - "sigs.k8s.io/*"
+      golang-x:
+        patterns:
+          - "golang.org/x/*"
+      testcontainers:
+        patterns:
+          - "github.com/testcontainers/*"
+          - "github.com/docker/*"
+          - "github.com/Microsoft/go-winio"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore(ci)"
+    labels:
+      - "dependencies"
+      - "github-actions"

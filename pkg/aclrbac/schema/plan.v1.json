@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/monedula-dev/monedula-acl-rbac-converter/schemas/plan.v1.json",
+  "title": "Role binding plan (monedula-acl-rbac)",
+  "type": "object",
+  "required": ["schema_version", "generated_at", "bindings", "unmapped", "rejected", "warnings", "deny_analysis"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string", "const": "1" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "acls_sha256": { "type": "string" },
+    "bindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "action", "principal", "role", "scope", "resource_patterns", "source_acl_ids"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^rb-[0-9a-f]{12}$" },
+          "action": { "enum": ["CREATE", "SKIP_EXISTS"] },
+          "principal": { "type": "string", "minLength": 1 },
+          "role": { "type": "string", "minLength": 1 },
+          "scope": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "organization": { "type": "string" },
+              "environment": { "type": "string" },
+              "kafka_cluster": { "type": "string" },
+              "schema_registry_cluster": { "type": "string" },
+              "ksql_cluster": { "type": "string" },
+              "connect_cluster": { "type": "string" }
+            }
+          },
+          "resource_patterns": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["resource_type", "name", "pattern_type"],
+              "additionalProperties": false,
+              "properties": {
+                "resource_type": {
+                  "enum": ["Cluster", "Topic", "Group", "TransactionalId", "DelegationToken", "Subject"]
+                },
+                "name": { "type": "string", "minLength": 1 },
+                "pattern_type": { "enum": ["LITERAL", "PREFIXED"] }
+              }
+            }
+          },
+          "source_acl_ids": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    },
+    "unmapped": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source_acl_ids", "reason"],
+        "additionalProperties": false,
+        "properties": {
+          "source_acl_ids": { "type": "array", "items": { "type": "integer", "minimum": 1 } },
+          "reason": { "type": "string" },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "rejected": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source_acl_ids", "reason"],
+        "additionalProperties": false,
+        "properties": {
+          "source_acl_ids": { "type": "array", "items": { "type": "integer", "minimum": 1 } },
+          "reason": { "type": "string" },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "detail"],
+        "additionalProperties": false,
+        "properties": {
+          "code": { "type": "string" },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "deny_analysis": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source_acl_id", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "source_acl_id": { "type": "integer", "minimum": 1 },
+          "status": { "enum": ["SAFE_TO_REMOVE", "WOULD_GRANT_ACCESS", "UNKNOWN"] },
+          "covering_rule": { "type": "string" }
+        }
+      }
+    }
+  }
+}

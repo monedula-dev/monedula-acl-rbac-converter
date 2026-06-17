@@ -1,0 +1,20 @@
+# An existing ConfluentRolebinding already applied to the cluster. The CFK
+# extractor records it in existing-bindings.json, and `plan` marks the matching
+# would-be binding as SKIP (already exists) instead of CREATE -- so re-running a
+# migration is idempotent and never re-creates bindings someone already made.
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: svc-orders-owner-systemadmin
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: svc-orders-owner
+  role: SystemAdmin
+  resourcePatterns:
+    - resourceType: Cluster
+      name: kafka-cluster
+      patternType: LITERAL
+  clustersScopeByIds:
+    kafkaClusterId: lkc-demo-1

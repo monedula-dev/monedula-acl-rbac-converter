@@ -1,0 +1,22 @@
+Current ACLs for resource `ResourcePattern(resourceType=TOPIC, name=orders, patternType=LITERAL)`:
+ 	(principal=User:svc-orders-consumer, host=*, operation=READ, permissionType=ALLOW)
+ 	(principal=User:svc-orders-consumer, host=*, operation=DESCRIBE, permissionType=ALLOW)
+ 	(principal=User:svc-orders-owner, host=*, operation=ALL, permissionType=ALLOW)
+ 	(principal=User:svc-orders-relay, host=*, operation=READ, permissionType=ALLOW)
+ 	(principal=User:svc-orders-relay, host=*, operation=WRITE, permissionType=ALLOW)
+ 	(principal=User:svc-orders-relay, host=*, operation=DESCRIBE, permissionType=ALLOW)
+
+Current ACLs for resource `ResourcePattern(resourceType=GROUP, name=orders-consumers, patternType=LITERAL)`:
+ 	(principal=User:svc-orders-consumer, host=*, operation=READ, permissionType=ALLOW)
+ 	(principal=User:svc-orders-consumer, host=*, operation=DESCRIBE, permissionType=ALLOW)
+
+Current ACLs for resource `ResourcePattern(resourceType=TOPIC, name=payments, patternType=LITERAL)`:
+ 	(principal=User:svc-payments-producer, host=*, operation=WRITE, permissionType=ALLOW)
+ 	(principal=User:svc-payments-producer, host=*, operation=DESCRIBE, permissionType=ALLOW)
+
+Current ACLs for resource `ResourcePattern(resourceType=TOPIC, name=events., patternType=PREFIXED)`:
+ 	(principal=User:svc-analytics, host=*, operation=READ, permissionType=ALLOW)
+ 	(principal=User:svc-analytics, host=*, operation=DESCRIBE, permissionType=ALLOW)
+
+Current ACLs for resource `ResourcePattern(resourceType=TOPIC, name=pii-events, patternType=LITERAL)`:
+ 	(principal=User:legacy-importer, host=*, operation=READ, permissionType=DENY)

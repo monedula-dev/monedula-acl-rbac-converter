@@ -1,0 +1,29 @@
+{
+  "schema_version": "1",
+  "source": {
+    "type": "cfk",
+    "generated_at": "2026-06-13T16:49:36Z"
+  },
+  "acls": [
+    {
+      "id": 2,
+      "principal": "User:svc-orders-owner",
+      "host": "*",
+      "operation": "All",
+      "resource_type": "Cluster",
+      "resource_name": "kafka-cluster",
+      "pattern_type": "LITERAL",
+      "permission_type": "Allow"
+    },
+    {
+      "id": 1,
+      "principal": "User:svc-platform-admin",
+      "host": "*",
+      "operation": "All",
+      "resource_type": "Cluster",
+      "resource_name": "kafka-cluster",
+      "pattern_type": "LITERAL",
+      "permission_type": "Allow"
+    }
+  ]
+}

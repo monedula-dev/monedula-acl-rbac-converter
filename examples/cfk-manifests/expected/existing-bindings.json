@@ -1,0 +1,19 @@
+[
+  {
+    "id": "",
+    "action": "CREATE",
+    "principal": "User:svc-orders-owner",
+    "role": "SystemAdmin",
+    "scope": {
+      "kafka_cluster": "lkc-demo-1"
+    },
+    "resource_patterns": [
+      {
+        "resource_type": "Cluster",
+        "name": "kafka-cluster",
+        "pattern_type": "LITERAL"
+      }
+    ],
+    "source_acl_ids": null
+  }
+]

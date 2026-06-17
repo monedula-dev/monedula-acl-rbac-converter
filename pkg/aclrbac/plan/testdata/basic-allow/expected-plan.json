@@ -1,0 +1,19 @@
+{
+  "schema_version": "1",
+  "generated_at": "2026-05-21T10:05:00Z",
+  "bindings": [{
+    "id": "rb-aaaaaaaaaaaa",
+    "action": "CREATE",
+    "principal": "User:alice",
+    "role": "DeveloperRead",
+    "scope": { "kafka_cluster": "lkc-kafka01" },
+    "resource_patterns": [{
+      "resource_type": "Topic", "name": "orders", "pattern_type": "LITERAL"
+    }],
+    "source_acl_ids": [1, 2]
+  }],
+  "unmapped": [],
+  "rejected": [],
+  "warnings": [],
+  "deny_analysis": []
+}

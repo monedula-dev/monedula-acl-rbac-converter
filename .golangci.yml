@@ -1,0 +1,91 @@
+# golangci-lint v2 configuration. Conservative starter set.
+#
+# Run locally:
+#   golangci-lint run ./...
+#
+# Install:
+#   go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: none
+  enable:
+    # Critical correctness.
+    - errcheck       # unchecked errors
+    - govet          # what 'go vet' runs, plus more
+    - ineffassign    # ineffectual assignments
+    - staticcheck    # bug-class checks + simplifications + unused
+    - unused         # unused constants, variables, functions, types
+
+    # Hygiene.
+    - misspell       # common misspellings
+    - unconvert      # unnecessary type conversions
+    - copyloopvar    # Go 1.22+ implicit per-iteration copy (we're on 1.26)
+
+  settings:
+    errcheck:
+      # defer X.Close() and stderr-bound fmt.Fprint* are intentionally
+      # discarded across the codebase; the underlying writes can't fail
+      # in a way the caller could meaningfully act on.
+      exclude-functions:
+        - (io.Closer).Close
+        - (*os.File).Close
+        - (*github.com/twmb/franz-go/pkg/kgo.Client).Close
+        - (*github.com/monedula-dev/monedula-acl-rbac-converter/pkg/aclrbac/rundir.Lock).Release
+        - fmt.Fprintln
+        - fmt.Fprintf
+        - fmt.Fprint
+        - os.Remove
+        - os.RemoveAll
+        - syscall.CloseHandle
+    staticcheck:
+      checks:
+        - all
+        # QF* are quickfix suggestions, not bug classes — drop them
+        # so the linter doesn't pester us about De Morgan's law and
+        # similar mechanical rewrites.
+        - -QF1001
+        - -QF1003
+        - -QF1008
+
+  exclusions:
+    generated: lax
+    rules:
+      # Test files: tolerate unchecked errors and unused helpers (table
+      # fixtures, captureStderr-style closures, etc.).
+      - path: _test\.go
+        linters:
+          - errcheck
+          - unused
+      # Integration / e2e harnesses spin up containers and fake servers
+      # with cleanup-on-defer patterns that errcheck cannot reason about
+      # cleanly.
+      - path: tests/(e2e|integration)/
+        linters:
+          - errcheck
+          - unused
+    paths:
+      - \.gomodcache/
+      - bin/
+      - dist/
+
+# Formatting gate. gofmt is checked as part of `golangci-lint run` and can be
+# auto-applied with `golangci-lint fmt`. NOTE: gofmt also normalises doc
+# comments, including rewriting two adjacent apostrophes (the shell '\'' idiom)
+# and double back-ticks into typographic quotes — keep such literals in
+# indented code blocks (see pkg/aclrbac/emit/shell/quote.go) so they survive.
+formatters:
+  enable:
+    - gofmt
+  exclusions:
+    paths:
+      - \.gomodcache/
+      - bin/
+      - dist/
+
+issues:
+  max-same-issues: 0

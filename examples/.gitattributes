@@ -1,0 +1,5 @@
+# Everything under examples/ is LF on all platforms. The run.sh scripts compare
+# freshly generated artifacts byte-for-byte against the committed expected/
+# goldens, and the parsers read the input fixtures (acls.txt, acls.csv, *.properties,
+# *.ldif, …) literally — a CRLF checkout on Windows would change both sides.
+* text=auto eol=lf

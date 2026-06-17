@@ -1,0 +1,17 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+    name: rb-aaaaaaaaaaaa
+    namespace: confluent
+spec:
+    principal:
+        type: user
+        name: alice
+    role: DeveloperRead
+    resourcePatterns:
+        - resourceType: Topic
+          name: orders
+          patternType: LITERAL
+    clustersScopeByIds:
+        kafkaClusterId: lkc-kafka01
+---

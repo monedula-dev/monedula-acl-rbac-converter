@@ -1,0 +1,116 @@
+# Embedded default mapping rules. These are the defaults exported by
+# `monedula-acl-rbac rules show` and the baseline that --rules custom.yaml
+# overrides.
+#
+# Rule schema: see spec §3.0 (operations_mode), §3.2 (rule entry shape).
+#
+# Ordering matters: rules are matched first-to-last. The `operations: [All]`
+# rules below are listed FIRST so that an `Allow All` ACL maps to the broad
+# role (ResourceOwner / SystemAdmin) rather than a narrower role. Normalize
+# expands ALL into its implied ops (Read, Write, Describe, ...), so an ALL
+# group would otherwise match a specific Read+Describe -> DeveloperRead rule
+# first and silently drop the Write/Delete/Alter grants. These [All] rules use
+# `operations_mode: any` and so only match groups that actually contain the
+# `All` op; ordinary Read+Describe groups never have it and fall through to the
+# specific rules further down.
+
+rules:
+  # ALL on Cluster -> SystemAdmin (covers CFK superusers)
+  - when:
+      operations: [All]
+      operations_mode: any
+      resource_type: Cluster
+      permission_type: Allow
+    then:
+      role: SystemAdmin
+      scope_template: kafka-cluster
+
+  # ALL on Topic / Group / TransactionalId -> ResourceOwner (scoped)
+  - when:
+      operations: [All]
+      operations_mode: any
+      resource_type: Topic
+      permission_type: Allow
+    then:
+      role: ResourceOwner
+      scope_template: kafka-cluster
+
+  - when:
+      operations: [All]
+      operations_mode: any
+      resource_type: Group
+      permission_type: Allow
+    then:
+      role: ResourceOwner
+      scope_template: kafka-cluster
+
+  - when:
+      operations: [All]
+      operations_mode: any
+      resource_type: TransactionalId
+      permission_type: Allow
+    then:
+      role: ResourceOwner
+      scope_template: kafka-cluster
+
+  # Read+Describe on Topic -> DeveloperRead
+  - when:
+      operations: [Read, Describe]
+      operations_mode: all
+      resource_type: Topic
+      permission_type: Allow
+    then:
+      role: DeveloperRead
+      scope_template: kafka-cluster
+
+  # Write+Describe on Topic -> DeveloperWrite
+  - when:
+      operations: [Write, Describe]
+      operations_mode: all
+      resource_type: Topic
+      permission_type: Allow
+    then:
+      role: DeveloperWrite
+      scope_template: kafka-cluster
+
+  # Read+Describe on Group -> DeveloperRead
+  - when:
+      operations: [Read, Describe]
+      operations_mode: all
+      resource_type: Group
+      permission_type: Allow
+    then:
+      role: DeveloperRead
+      scope_template: kafka-cluster
+
+  # Write+Describe on TransactionalId -> DeveloperWrite
+  - when:
+      operations: [Write, Describe]
+      operations_mode: all
+      resource_type: TransactionalId
+      permission_type: Allow
+    then:
+      role: DeveloperWrite
+      scope_template: kafka-cluster
+
+  # DescribeConfigs / AlterConfigs on Topic -> ResourceOwner
+  # (configs are not separable in RBAC; collapsing both here is the safest
+  # opinionated default.)
+  - when:
+      operations: [DescribeConfigs, AlterConfigs]
+      operations_mode: any
+      resource_type: Topic
+      permission_type: Allow
+    then:
+      role: ResourceOwner
+      scope_template: kafka-cluster
+
+  # IdempotentWrite on Cluster -> DeveloperWrite (cluster-scope)
+  - when:
+      operations: [IdempotentWrite]
+      operations_mode: any
+      resource_type: Cluster
+      permission_type: Allow
+    then:
+      role: DeveloperWrite
+      scope_template: kafka-cluster

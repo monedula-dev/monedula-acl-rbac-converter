@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/monedula-dev/monedula-acl-rbac-converter/schemas/acls.v1.json",
+  "title": "ACL set (monedula-acl-rbac)",
+  "type": "object",
+  "required": ["schema_version", "source", "acls"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string", "const": "1" },
+    "source": {
+      "type": "object",
+      "required": ["type", "generated_at"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": ["live", "text", "json", "yaml", "csv", "strimzi", "cfk", "k8s", "script"]
+        },
+        "generated_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "acls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id", "principal", "host", "operation",
+          "resource_type", "resource_name", "pattern_type", "permission_type"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "integer", "minimum": 1 },
+          "principal": { "type": "string", "minLength": 1 },
+          "host": { "type": "string", "minLength": 1 },
+          "operation": {
+            "enum": [
+              "Read", "Write", "Create", "Delete", "Alter",
+              "Describe", "ClusterAction", "DescribeConfigs",
+              "AlterConfigs", "IdempotentWrite", "All"
+            ]
+          },
+          "resource_type": {
+            "enum": ["Cluster", "Topic", "Group", "TransactionalId", "DelegationToken", "Subject"]
+          },
+          "resource_name": { "type": "string", "minLength": 1 },
+          "pattern_type": { "enum": ["LITERAL", "PREFIXED"] },
+          "permission_type": { "enum": ["Allow", "Deny"] }
+        }
+      }
+    }
+  }
+}

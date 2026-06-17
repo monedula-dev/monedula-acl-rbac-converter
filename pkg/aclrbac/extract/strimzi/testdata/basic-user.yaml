@@ -1,0 +1,23 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: alice
+  namespace: kafka
+spec:
+  authorization:
+    type: simple
+    acls:
+      - resource:
+          type: topic
+          name: orders
+          patternType: literal
+        operations: [Read, Describe]
+        host: "*"
+        type: allow
+      - resource:
+          type: group
+          name: billing-consumer
+          patternType: literal
+        operations: [Read]
+        host: "*"
+        type: allow

@@ -1,0 +1,29 @@
+# Build artifacts
+bin/
+dist/
+/monedula-acl-rbac
+*.exe
+
+# Test artifacts
+coverage.out
+coverage.html
+*.test
+
+# Go local caches (when GOCACHE / GOMODCACHE point inside the repo, e.g. in
+# sandboxed dev environments). These are huge and machine-specific.
+.gocache/
+.gomodcache/
+
+# Go workspace files (developer-local; not part of the module surface)
+go.work
+go.work.sum
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Run directories produced by the tool itself
+runs/
+.claude/

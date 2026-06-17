@@ -1,0 +1,2 @@
+go test fuzz v1
+[]byte("id,principal,host,operation,resource_type,resource_name,pattern_type,permission_type\n1,User:a,*,Read@Topic,t1,LITERAL,Allow\n")

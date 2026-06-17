@@ -1,0 +1,14 @@
+id,principal,host,operation,resource_type,resource_name,pattern_type,permission_type
+1,User:svc-orders-consumer,*,Read,Topic,orders,LITERAL,Allow
+2,User:svc-orders-consumer,*,Describe,Topic,orders,LITERAL,Allow
+3,User:svc-orders-consumer,*,Read,Group,orders-consumers,LITERAL,Allow
+4,User:svc-orders-consumer,*,Describe,Group,orders-consumers,LITERAL,Allow
+5,User:svc-payments-producer,*,Write,Topic,payments,LITERAL,Allow
+6,User:svc-payments-producer,*,Describe,Topic,payments,LITERAL,Allow
+7,User:svc-analytics,*,Read,Topic,events.,PREFIXED,Allow
+8,User:svc-analytics,*,Describe,Topic,events.,PREFIXED,Allow
+9,User:svc-orders-owner,*,All,Topic,orders,LITERAL,Allow
+10,User:svc-orders-relay,*,Read,Topic,orders,LITERAL,Allow
+11,User:svc-orders-relay,*,Write,Topic,orders,LITERAL,Allow
+12,User:svc-orders-relay,*,Describe,Topic,orders,LITERAL,Allow
+13,User:legacy-importer,*,Read,Topic,pii-events,LITERAL,Deny

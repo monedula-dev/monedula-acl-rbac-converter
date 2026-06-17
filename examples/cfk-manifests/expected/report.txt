@@ -1,0 +1,12 @@
+Plan generated at <NORMALIZED>
+
+plan: 2 binding(s), 0 unmapped, 0 rejected, 0 warning(s)
+
+Bindings:
+  [SKIP_EXISTS] SystemAdmin for User:svc-orders-owner -> kafka=lkc-demo-1 on:
+    - Cluster:kafka-cluster (LITERAL)
+    source_acl_ids: [2]
+  [CREATE] SystemAdmin for User:svc-platform-admin -> kafka=lkc-demo-1 on:
+    - Cluster:kafka-cluster (LITERAL)
+    source_acl_ids: [1]
+

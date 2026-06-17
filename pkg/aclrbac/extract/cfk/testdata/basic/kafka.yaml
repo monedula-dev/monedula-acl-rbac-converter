@@ -1,0 +1,11 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  authorization:
+    type: rbac
+    superUsers:
+      - User:admin
+      - User:CN=ops-team,O=acme,C=US

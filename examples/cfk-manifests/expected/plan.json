@@ -1,0 +1,49 @@
+{
+  "schema_version": "1",
+  "generated_at": "<NORMALIZED>",
+  "acls_sha256": "<NORMALIZED>",
+  "bindings": [
+    {
+      "id": "rb-752ad15548dd",
+      "action": "SKIP_EXISTS",
+      "principal": "User:svc-orders-owner",
+      "role": "SystemAdmin",
+      "scope": {
+        "kafka_cluster": "lkc-demo-1"
+      },
+      "resource_patterns": [
+        {
+          "resource_type": "Cluster",
+          "name": "kafka-cluster",
+          "pattern_type": "LITERAL"
+        }
+      ],
+      "source_acl_ids": [
+        2
+      ]
+    },
+    {
+      "id": "rb-913955c4d0ce",
+      "action": "CREATE",
+      "principal": "User:svc-platform-admin",
+      "role": "SystemAdmin",
+      "scope": {
+        "kafka_cluster": "lkc-demo-1"
+      },
+      "resource_patterns": [
+        {
+          "resource_type": "Cluster",
+          "name": "kafka-cluster",
+          "pattern_type": "LITERAL"
+        }
+      ],
+      "source_acl_ids": [
+        1
+      ]
+    }
+  ],
+  "unmapped": [],
+  "rejected": [],
+  "warnings": [],
+  "deny_analysis": []
+}

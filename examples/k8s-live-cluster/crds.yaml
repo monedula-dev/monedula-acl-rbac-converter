@@ -1,0 +1,71 @@
+# Minimal CRDs so a bare kind cluster recognises the custom resources the k8s
+# source lists. These register only the kinds (with open schemas) -- they do NOT
+# install the Strimzi or Confluent operators, which are not needed: the extractor
+# only *reads* the CRs via the Kubernetes API.
+#
+# kafka.strimzi.io/KafkaUser carries the ACLs in this example. The CFK kinds
+# (platform.confluent.io Kafka + ConfluentRolebinding) are registered too so the
+# extractor's list calls resolve cleanly; they have no instances here.
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: kafkausers.kafka.strimzi.io
+spec:
+  group: kafka.strimzi.io
+  scope: Namespaced
+  names:
+    plural: kafkausers
+    singular: kafkauser
+    kind: KafkaUser
+    listKind: KafkaUserList
+  versions:
+    - name: v1beta2
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: kafkas.platform.confluent.io
+spec:
+  group: platform.confluent.io
+  scope: Namespaced
+  names:
+    plural: kafkas
+    singular: kafka
+    kind: Kafka
+    listKind: KafkaList
+  versions:
+    - name: v1beta1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: confluentrolebindings.platform.confluent.io
+spec:
+  group: platform.confluent.io
+  scope: Namespaced
+  names:
+    plural: confluentrolebindings
+    singular: confluentrolebinding
+    kind: ConfluentRolebinding
+    listKind: ConfluentRolebindingList
+  versions:
+    - name: v1beta1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          x-kubernetes-preserve-unknown-fields: true

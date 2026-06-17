@@ -1,0 +1,86 @@
+# Strimzi KafkaUser CRs, as you would find them applied to a Strimzi-managed
+# Kafka cluster. The principal is derived from metadata.name (User:<name>).
+# Only `authorization.type: simple` users produce ACLs.
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: svc-orders-consumer
+  namespace: kafka
+spec:
+  authorization:
+    type: simple
+    acls:
+      - resource: { type: topic, name: orders, patternType: literal }
+        operations: [Read, Describe]
+        type: allow
+      - resource: { type: group, name: orders-consumers, patternType: literal }
+        operations: [Read, Describe]
+        type: allow
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: svc-payments-producer
+  namespace: kafka
+spec:
+  authorization:
+    type: simple
+    acls:
+      - resource: { type: topic, name: payments, patternType: literal }
+        operations: [Write, Describe]
+        type: allow
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: svc-analytics
+  namespace: kafka
+spec:
+  authorization:
+    type: simple
+    acls:
+      - resource: { type: topic, name: "events.", patternType: prefix }
+        operations: [Read, Describe]
+        type: allow
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: svc-orders-owner
+  namespace: kafka
+spec:
+  authorization:
+    type: simple
+    acls:
+      - resource: { type: topic, name: orders, patternType: literal }
+        operations: [All]
+        type: allow
+---
+# svc-orders-relay consumes AND re-publishes the orders topic. Read+Write on one
+# resource maps to two roles (DeveloperRead + DeveloperWrite); RBAC is additive.
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: svc-orders-relay
+  namespace: kafka
+spec:
+  authorization:
+    type: simple
+    acls:
+      - resource: { type: topic, name: orders, patternType: literal }
+        operations: [Read, Write, Describe]
+        type: allow
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: legacy-importer
+  namespace: kafka
+spec:
+  authorization:
+    type: simple
+    acls:
+      - resource: { type: topic, name: pii-events, patternType: literal }
+        operations: [Read]
+        type: deny

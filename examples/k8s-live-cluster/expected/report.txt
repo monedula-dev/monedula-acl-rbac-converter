@@ -1,0 +1,33 @@
+Plan generated at <NORMALIZED>
+
+plan: 7 binding(s), 0 unmapped, 1 rejected, 0 warning(s); DENY: 1 safe / 0 would-grant / 0 unknown
+
+Bindings:
+  [CREATE] DeveloperRead for User:svc-analytics -> kafka=lkc-demo-1 on:
+    - Topic:events. (PREFIXED)
+    source_acl_ids: [2 3]
+  [CREATE] DeveloperRead for User:svc-orders-consumer -> kafka=lkc-demo-1 on:
+    - Group:orders-consumers (LITERAL)
+    source_acl_ids: [6 7]
+  [CREATE] DeveloperRead for User:svc-orders-consumer -> kafka=lkc-demo-1 on:
+    - Topic:orders (LITERAL)
+    source_acl_ids: [4 5]
+  [CREATE] ResourceOwner for User:svc-orders-owner -> kafka=lkc-demo-1 on:
+    - Topic:orders (LITERAL)
+    source_acl_ids: [8]
+  [CREATE] DeveloperRead for User:svc-orders-relay -> kafka=lkc-demo-1 on:
+    - Topic:orders (LITERAL)
+    source_acl_ids: [9 10 11]
+  [CREATE] DeveloperWrite for User:svc-orders-relay -> kafka=lkc-demo-1 on:
+    - Topic:orders (LITERAL)
+    source_acl_ids: [9 10 11]
+  [CREATE] DeveloperWrite for User:svc-payments-producer -> kafka=lkc-demo-1 on:
+    - Topic:payments (LITERAL)
+    source_acl_ids: [12 13]
+
+Rejected:
+  - DENY_PERMISSION (source_acl_ids=[1]): DENY Read on Topic:pii-events for User:legacy-importer
+
+DENY analysis:
+  - source_acl_id=1 SAFE_TO_REMOVE
+

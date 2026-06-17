@@ -1,0 +1,17 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+    name: rb-913955c4d0ce
+    namespace: confluent
+spec:
+    principal:
+        type: user
+        name: svc-platform-admin
+    role: SystemAdmin
+    resourcePatterns:
+        - resourceType: Cluster
+          name: kafka-cluster
+          patternType: LITERAL
+    clustersScopeByIds:
+        kafkaClusterId: lkc-demo-1
+---

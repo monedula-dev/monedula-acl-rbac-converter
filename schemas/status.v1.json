@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/monedula-dev/monedula-acl-rbac-converter/schemas/status.v1.json",
+  "title": "Status report envelope (monedula-acl-rbac status --format json)",
+  "type": "object",
+  "required": ["schema_version", "run_dir"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string", "const": "1" },
+    "run_dir": { "type": "string", "minLength": 1 },
+    "extract": { "$ref": "#/$defs/step" },
+    "plan": { "$ref": "#/$defs/step" },
+    "apply": { "$ref": "#/$defs/step" },
+    "verify": { "$ref": "#/$defs/step" },
+    "delete": { "$ref": "#/$defs/step" },
+    "delete_deny": { "$ref": "#/$defs/step" },
+    "lock": { "type": "string" }
+  },
+  "$defs": {
+    "step": {
+      "type": "object",
+      "required": ["present"],
+      "additionalProperties": false,
+      "properties": {
+        "present": { "type": "boolean" },
+        "detail": {
+          "description": "Per-step payload. Shape varies by step: a counts map for verify, source/acl_count for extract, etc. Any type is permitted; downstream consumers branch on the step name."
+        }
+      }
+    }
+  }
+}

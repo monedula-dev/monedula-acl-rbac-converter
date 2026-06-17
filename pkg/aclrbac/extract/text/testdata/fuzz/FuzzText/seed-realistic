@@ -1,0 +1,2 @@
+go test fuzz v1
+[]byte("Current ACLs for resource `ResourcePattern(resourceType=TOPIC, name=orders, patternType=LITERAL)`:\n\t(principal=User:alice, host=*, operation=READ, permissionType=ALLOW)\n\t(principal=User:alice, host=*, operation=DESCRIBE, permissionType=ALLOW)\n\nCurrent ACLs for resource `ResourcePattern(resourceType=GROUP, name=orders-consumer, patternType=LITERAL)`:\n\t(principal=User:alice, host=*, operation=READ, permissionType=ALLOW)\n")

@@ -1,0 +1,18 @@
+# Run this example fully inside Docker -- no local Go toolchain required:
+#
+#   docker compose run --rm converter ./run.sh --check
+#
+# The `converter` service builds the monedula-acl-rbac CLI from the repository
+# root (../..) into the shared monedula-acl-rbac:examples image -- built once and
+# reused by every file-based example via Docker's layer cache. The whole
+# examples/ tree is mounted at /examples (so run.sh can reach ../lib/common.sh),
+# and this example is the working directory, so out/ lands back on the host.
+services:
+  converter:
+    build:
+      context: ../..
+      dockerfile: examples/converter.Dockerfile
+    image: monedula-acl-rbac:examples
+    working_dir: /examples/text-dump
+    volumes:
+      - ../:/examples

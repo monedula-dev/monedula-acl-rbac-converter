@@ -1,0 +1,6 @@
+# The kafka cluster id MDS reports for this stack. It is fixed because the
+# broker is started with a fixed KRaft CLUSTER_ID (see docker-compose.yml), so
+# the converted binding IDs are reproducible. run.sh re-derives it from MDS at
+# runtime anyway, writing out/scopes.yaml, so the pipeline is correct even if you
+# change the cluster id.
+kafka_cluster: MkU3OEVBNTcwNTJENDM2Qk

@@ -1,0 +1,11 @@
+id,principal,host,operation,resource_type,resource_name,pattern_type,permission_type
+1,User:alice,*,Read,Topic,orders,LITERAL,Allow
+2,User:alice,*,Describe,Topic,orders,LITERAL,Allow
+3,User:bob,*,Write,Topic,orders,LITERAL,Allow
+4,User:bob,*,Describe,Topic,orders,LITERAL,Allow
+5,User:billing-svc,*,Read,Topic,billing-,PREFIXED,Allow
+6,User:billing-svc,*,Write,Topic,billing-,PREFIXED,Allow
+7,User:billing-svc,*,Describe,Topic,billing-,PREFIXED,Allow
+8,User:alice,*,Read,Group,orders-consumer,LITERAL,Allow
+9,User:alice,*,Describe,Group,orders-consumer,LITERAL,Allow
+10,User:admin,*,All,Cluster,kafka-cluster,LITERAL,Allow

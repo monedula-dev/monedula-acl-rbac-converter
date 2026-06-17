@@ -1,0 +1,166 @@
+{
+  "schema_version": "1",
+  "generated_at": "<NORMALIZED>",
+  "acls_sha256": "<NORMALIZED>",
+  "bindings": [
+    {
+      "id": "rb-34cb37050564",
+      "action": "CREATE",
+      "principal": "User:svc-analytics",
+      "role": "DeveloperRead",
+      "scope": {
+        "kafka_cluster": "MkU3OEVBNTcwNTJENDM2Qk"
+      },
+      "resource_patterns": [
+        {
+          "resource_type": "Topic",
+          "name": "events.",
+          "pattern_type": "PREFIXED"
+        }
+      ],
+      "source_acl_ids": [
+        2,
+        3
+      ]
+    },
+    {
+      "id": "rb-02380eaec8b1",
+      "action": "CREATE",
+      "principal": "User:svc-fulfillment",
+      "role": "DeveloperRead",
+      "scope": {
+        "kafka_cluster": "MkU3OEVBNTcwNTJENDM2Qk"
+      },
+      "resource_patterns": [
+        {
+          "resource_type": "Topic",
+          "name": "shipments",
+          "pattern_type": "LITERAL"
+        }
+      ],
+      "source_acl_ids": [
+        4,
+        5
+      ]
+    },
+    {
+      "id": "rb-8bfbf58b9f35",
+      "action": "CREATE",
+      "principal": "User:svc-orders-consumer",
+      "role": "DeveloperRead",
+      "scope": {
+        "kafka_cluster": "MkU3OEVBNTcwNTJENDM2Qk"
+      },
+      "resource_patterns": [
+        {
+          "resource_type": "Group",
+          "name": "orders-consumers",
+          "pattern_type": "LITERAL"
+        }
+      ],
+      "source_acl_ids": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "rb-75209e584318",
+      "action": "CREATE",
+      "principal": "User:svc-orders-consumer",
+      "role": "DeveloperRead",
+      "scope": {
+        "kafka_cluster": "MkU3OEVBNTcwNTJENDM2Qk"
+      },
+      "resource_patterns": [
+        {
+          "resource_type": "Topic",
+          "name": "orders",
+          "pattern_type": "LITERAL"
+        }
+      ],
+      "source_acl_ids": [
+        6,
+        7
+      ]
+    },
+    {
+      "id": "rb-fd3636389275",
+      "action": "CREATE",
+      "principal": "User:svc-orders-relay",
+      "role": "DeveloperRead",
+      "scope": {
+        "kafka_cluster": "MkU3OEVBNTcwNTJENDM2Qk"
+      },
+      "resource_patterns": [
+        {
+          "resource_type": "Topic",
+          "name": "orders",
+          "pattern_type": "LITERAL"
+        }
+      ],
+      "source_acl_ids": [
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "id": "rb-526586ce7bdd",
+      "action": "CREATE",
+      "principal": "User:svc-orders-relay",
+      "role": "DeveloperWrite",
+      "scope": {
+        "kafka_cluster": "MkU3OEVBNTcwNTJENDM2Qk"
+      },
+      "resource_patterns": [
+        {
+          "resource_type": "Topic",
+          "name": "orders",
+          "pattern_type": "LITERAL"
+        }
+      ],
+      "source_acl_ids": [
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "id": "rb-746e333f04ec",
+      "action": "CREATE",
+      "principal": "User:svc-payments-producer",
+      "role": "DeveloperWrite",
+      "scope": {
+        "kafka_cluster": "MkU3OEVBNTcwNTJENDM2Qk"
+      },
+      "resource_patterns": [
+        {
+          "resource_type": "Topic",
+          "name": "payments",
+          "pattern_type": "LITERAL"
+        }
+      ],
+      "source_acl_ids": [
+        13,
+        14
+      ]
+    }
+  ],
+  "unmapped": [],
+  "rejected": [
+    {
+      "source_acl_ids": [
+        1
+      ],
+      "reason": "DENY_PERMISSION",
+      "detail": "DENY Read on Topic:pii-events for User:legacy-importer"
+    }
+  ],
+  "warnings": [],
+  "deny_analysis": [
+    {
+      "source_acl_id": 1,
+      "status": "SAFE_TO_REMOVE"
+    }
+  ]
+}

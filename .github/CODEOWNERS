@@ -1,0 +1,11 @@
+# Default reviewers for everything.
+*                            @gkocur @mmatloka
+
+# Schemas are touchier than ordinary code — every change should
+# get a second pair of eyes.
+/schemas/                    @gkocur @mmatloka
+/pkg/aclrbac/schema/         @gkocur @mmatloka
+
+# Security-sensitive code paths.
+/pkg/aclrbac/delete/         @gkocur @mmatloka
+/pkg/aclrbac/mds/            @gkocur @mmatloka

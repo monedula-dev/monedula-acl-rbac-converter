@@ -1,0 +1,101 @@
+version: 2
+
+project_name: monedula-acl-rbac
+
+# NOTE: no `before:` hooks. Earlier revisions ran `sync-schemas` and
+# `go mod tidy` here to ensure a clean tree before the build, but that meant
+# goreleaser MUTATED the tagged tree (regenerated schemas / tidied modules)
+# before signing artefacts, so the "signed bytes" weren't necessarily the
+# tagged bytes. The release workflow's preflight (.github/workflows/release.yml)
+# now verifies the tagged tree is already clean (`sync-schemas` + git diff
+# --exit-code, `go mod tidy -diff`) and fails fast if it isn't. The build that
+# goreleaser signs is therefore exactly the committed tree.
+#
+# Local `goreleaser release --snapshot --clean` users should run
+# `make sync-schemas && go mod tidy` themselves first if their working tree is
+# dirty.
+
+builds:
+  - id: monedula-acl-rbac
+    main: ./cmd/monedula-acl-rbac
+    binary: monedula-acl-rbac
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X github.com/monedula-dev/monedula-acl-rbac-converter/pkg/aclrbac/version.Version={{.Version}}
+      - -X github.com/monedula-dev/monedula-acl-rbac-converter/pkg/aclrbac/cli.Commit={{.ShortCommit}}
+      - -X github.com/monedula-dev/monedula-acl-rbac-converter/pkg/aclrbac/cli.Date={{.Date}}
+
+archives:
+  - id: monedula-acl-rbac
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - README.md
+      - CHANGELOG.md
+      - LICENSE
+      - SECURITY.md
+      - CONTRIBUTING.md
+      - QUICKSTART.md
+
+checksum:
+  name_template: "checksums.txt"
+
+# SBOM generated per archive via Syft — an unsigned `<archive>.sbom.json` file
+# placed next to each archive (not a signed attestation). Operators can scan it
+# with `grype sbom:<archive>.sbom.json` or inspect it directly.
+sboms:
+  - artifacts: archive
+
+# Cosign keyless signing via GitHub OIDC. No private key management
+# needed; the workflow's id-token permission supplies the identity.
+# Operators verify with:
+#   cosign verify-blob \
+#     --certificate-identity-regexp '^https://github.com/monedula-dev/.*' \
+#     --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+#     --signature checksums.txt.sig --certificate checksums.txt.pem \
+#     checksums.txt
+signs:
+  - id: checksums
+    cmd: cosign
+    artifacts: checksum
+    args:
+      - sign-blob
+      - "--output-signature=${signature}"
+      - "--output-certificate=${certificate}"
+      - "${artifact}"
+      - "--yes"
+    output: true
+
+changelog:
+  # github-native derives the "What's Changed" list from merged PRs/commits
+  # since the previous tag. For subsequent releases this is exactly right; for
+  # the very first tag (no prior tag, squashed history) it is necessarily
+  # thin — `draft: true` below means a human reviews and can paste the
+  # CHANGELOG body before publishing, and `header` links to it.
+  use: github-native
+
+release:
+  github:
+    owner: monedula-dev
+    name: monedula-acl-rbac-converter
+  prerelease: auto
+  draft: true
+  header: |
+    Full release notes: see the
+    [CHANGELOG]({{ .GitURL }}/blob/{{ .Tag }}/CHANGELOG.md) and the
+    [README]({{ .GitURL }}/blob/{{ .Tag }}/README.md#install) for install
+    and verification (cosign + SBOM) instructions.

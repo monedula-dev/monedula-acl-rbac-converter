@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/monedula-dev/monedula-acl-rbac-converter/schemas/verify-summary.v1.json",
+  "title": "Verify summary envelope (monedula-acl-rbac verify --format json + verify.json on disk)",
+  "type": "object",
+  "required": ["schema_version", "plan_sha256", "results", "counts"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string", "const": "1" },
+    "plan_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 of the plan.json this verify run was generated against. delete-* refuses to run if it does not match the plan being deleted."
+    },
+    "mode": {
+      "enum": ["effective", "bindings-exist"],
+      "description": "Verification strategy used for this run."
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["status"],
+        "additionalProperties": false,
+        "properties": {
+          "binding_id": { "type": "string" },
+          "source_acl_id": { "type": "integer", "minimum": 0 },
+          "status": {
+            "enum": [
+              "BINDING_EXISTS",
+              "BINDING_MISSING",
+              "BINDING_UNKNOWN",
+              "EFFECTIVE_OK",
+              "EFFECTIVE_MISSING",
+              "EFFECTIVE_UNKNOWN"
+            ]
+          },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "required": ["total", "effective_ok", "effective_missing", "effective_unknown"],
+      "additionalProperties": false,
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "effective_ok": { "type": "integer", "minimum": 0 },
+        "effective_missing": { "type": "integer", "minimum": 0 },
+        "effective_unknown": { "type": "integer", "minimum": 0 },
+        "binding_exists": { "type": "integer", "minimum": 0 },
+        "binding_missing": { "type": "integer", "minimum": 0 },
+        "binding_unknown": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

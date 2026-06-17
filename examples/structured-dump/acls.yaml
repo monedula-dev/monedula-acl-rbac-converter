@@ -1,0 +1,25 @@
+schema_version: "1"
+source:
+  type: yaml
+  generated_at: "2026-06-13T00:00:00Z"
+acls:
+  # svc-orders-consumer: reads the orders topic and commits to its group.
+  - { id: 1,  principal: "User:svc-orders-consumer",  host: "*", operation: Read,     resource_type: Topic, resource_name: orders,           pattern_type: LITERAL,  permission_type: Allow }
+  - { id: 2,  principal: "User:svc-orders-consumer",  host: "*", operation: Describe, resource_type: Topic, resource_name: orders,           pattern_type: LITERAL,  permission_type: Allow }
+  - { id: 3,  principal: "User:svc-orders-consumer",  host: "*", operation: Read,     resource_type: Group, resource_name: orders-consumers, pattern_type: LITERAL,  permission_type: Allow }
+  - { id: 4,  principal: "User:svc-orders-consumer",  host: "*", operation: Describe, resource_type: Group, resource_name: orders-consumers, pattern_type: LITERAL,  permission_type: Allow }
+  # svc-payments-producer: writes the payments topic.
+  - { id: 5,  principal: "User:svc-payments-producer", host: "*", operation: Write,    resource_type: Topic, resource_name: payments,         pattern_type: LITERAL,  permission_type: Allow }
+  - { id: 6,  principal: "User:svc-payments-producer", host: "*", operation: Describe, resource_type: Topic, resource_name: payments,         pattern_type: LITERAL,  permission_type: Allow }
+  # svc-analytics: reads every topic under the events. prefix.
+  - { id: 7,  principal: "User:svc-analytics",         host: "*", operation: Read,     resource_type: Topic, resource_name: "events.",        pattern_type: PREFIXED, permission_type: Allow }
+  - { id: 8,  principal: "User:svc-analytics",         host: "*", operation: Describe, resource_type: Topic, resource_name: "events.",        pattern_type: PREFIXED, permission_type: Allow }
+  # svc-orders-owner: full control of the orders topic (All -> ResourceOwner).
+  - { id: 9,  principal: "User:svc-orders-owner",      host: "*", operation: All,      resource_type: Topic, resource_name: orders,           pattern_type: LITERAL,  permission_type: Allow }
+  # svc-orders-relay: consumes AND re-publishes the orders topic. Read+Write on
+  # one resource needs two roles (DeveloperRead + DeveloperWrite); RBAC is additive.
+  - { id: 10, principal: "User:svc-orders-relay",      host: "*", operation: Read,     resource_type: Topic, resource_name: orders,           pattern_type: LITERAL,  permission_type: Allow }
+  - { id: 11, principal: "User:svc-orders-relay",      host: "*", operation: Write,    resource_type: Topic, resource_name: orders,           pattern_type: LITERAL,  permission_type: Allow }
+  - { id: 12, principal: "User:svc-orders-relay",      host: "*", operation: Describe, resource_type: Topic, resource_name: orders,           pattern_type: LITERAL,  permission_type: Allow }
+  # legacy-importer: a DENY -- RBAC has no deny semantics, so this is rejected.
+  - { id: 13, principal: "User:legacy-importer",       host: "*", operation: Read,     resource_type: Topic, resource_name: "pii-events",     pattern_type: LITERAL,  permission_type: Deny }

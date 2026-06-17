@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/monedula-dev/monedula-acl-rbac-converter/schemas/apply-summary.v1.json",
+  "title": "Apply summary envelope (monedula-acl-rbac apply --format json)",
+  "type": "object",
+  "required": ["schema_version", "bindings", "counts"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string", "const": "1" },
+    "bindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["binding_id", "principal", "role", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "binding_id": { "type": "string", "pattern": "^rb-[0-9a-f]{12}$" },
+          "principal": { "type": "string", "minLength": 1 },
+          "role": { "type": "string", "minLength": 1 },
+          "status": {
+            "enum": ["CREATED", "SKIP_EXISTS", "FAILED", "WOULD_CREATE", "WOULD_SKIP"]
+          },
+          "error": { "type": "string" }
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "required": ["total", "created", "skip_exists", "failed"],
+      "additionalProperties": false,
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "created": { "type": "integer", "minimum": 0 },
+        "skip_exists": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "would_create": { "type": "integer", "minimum": 0 },
+        "would_skip": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

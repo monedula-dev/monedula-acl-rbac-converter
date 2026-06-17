@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/monedula-dev/monedula-acl-rbac-converter/schemas/report.v1.json",
+  "title": "Report envelope (monedula-acl-rbac report --format json)",
+  "description": "Envelope that wraps a plan with an outer schema_version. The inner `plan` field is a plan.v1.json document; cross-file validation is left to the caller (inline a permissive object here so this schema validates standalone).",
+  "type": "object",
+  "required": ["schema_version", "plan"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string", "const": "1" },
+    "plan": {
+      "description": "Plan body. Conforms to plan.v1.json — kept open here so this schema can be used without resolving cross-file refs. Validate the plan body separately against plan.v1.json if you need stricter checking.",
+      "type": "object"
+    }
+  }
+}

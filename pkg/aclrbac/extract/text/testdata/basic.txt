@@ -1,0 +1,6 @@
+Current ACLs for resource `ResourcePattern(resourceType=TOPIC, name=orders, patternType=LITERAL)`:
+        (principal=User:alice, host=*, operation=READ, permissionType=ALLOW)
+        (principal=User:alice, host=*, operation=DESCRIBE, permissionType=ALLOW)
+
+Current ACLs for resource `ResourcePattern(resourceType=GROUP, name=billing-consumer, patternType=LITERAL)`:
+        (principal=User:alice, host=*, operation=READ, permissionType=ALLOW)

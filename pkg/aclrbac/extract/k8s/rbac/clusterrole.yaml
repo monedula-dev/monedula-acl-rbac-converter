@@ -1,0 +1,13 @@
+# Recommended ClusterRole for the k8s extractor (spec §9.3). Apply this
+# once, then bind it to the ServiceAccount your tool runs under.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: monedula-acl-rbac-extractor
+rules:
+  - apiGroups: ["kafka.strimzi.io"]
+    resources: ["kafkausers", "kafkatopics"]
+    verbs: ["get", "list"]
+  - apiGroups: ["platform.confluent.io"]
+    resources: ["kafkas", "confluentrolebindings", "kafkatopics"]
+    verbs: ["get", "list"]

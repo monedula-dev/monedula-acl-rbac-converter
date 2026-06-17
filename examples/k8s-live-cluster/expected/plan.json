@@ -1,0 +1,165 @@
+{
+  "schema_version": "1",
+  "generated_at": "<NORMALIZED>",
+  "acls_sha256": "<NORMALIZED>",
+  "bindings": [
+    {
+      "id": "rb-b6fac2ae9aa0",
+      "action": "CREATE",
+      "principal": "User:svc-analytics",
+      "role": "DeveloperRead",
+      "scope": {
+        "kafka_cluster": "lkc-demo-1"
+      },
+      "resource_patterns": [
+        {
+          "resource_type": "Topic",
+          "name": "events.",
+          "pattern_type": "PREFIXED"
+        }
+      ],
+      "source_acl_ids": [
+        2,
+        3
+      ]
+    },
+    {
+      "id": "rb-80316b05c1c2",
+      "action": "CREATE",
+      "principal": "User:svc-orders-consumer",
+      "role": "DeveloperRead",
+      "scope": {
+        "kafka_cluster": "lkc-demo-1"
+      },
+      "resource_patterns": [
+        {
+          "resource_type": "Group",
+          "name": "orders-consumers",
+          "pattern_type": "LITERAL"
+        }
+      ],
+      "source_acl_ids": [
+        6,
+        7
+      ]
+    },
+    {
+      "id": "rb-b3154d837238",
+      "action": "CREATE",
+      "principal": "User:svc-orders-consumer",
+      "role": "DeveloperRead",
+      "scope": {
+        "kafka_cluster": "lkc-demo-1"
+      },
+      "resource_patterns": [
+        {
+          "resource_type": "Topic",
+          "name": "orders",
+          "pattern_type": "LITERAL"
+        }
+      ],
+      "source_acl_ids": [
+        4,
+        5
+      ]
+    },
+    {
+      "id": "rb-487eba1f8a6d",
+      "action": "CREATE",
+      "principal": "User:svc-orders-owner",
+      "role": "ResourceOwner",
+      "scope": {
+        "kafka_cluster": "lkc-demo-1"
+      },
+      "resource_patterns": [
+        {
+          "resource_type": "Topic",
+          "name": "orders",
+          "pattern_type": "LITERAL"
+        }
+      ],
+      "source_acl_ids": [
+        8
+      ]
+    },
+    {
+      "id": "rb-9f2d509a84c4",
+      "action": "CREATE",
+      "principal": "User:svc-orders-relay",
+      "role": "DeveloperRead",
+      "scope": {
+        "kafka_cluster": "lkc-demo-1"
+      },
+      "resource_patterns": [
+        {
+          "resource_type": "Topic",
+          "name": "orders",
+          "pattern_type": "LITERAL"
+        }
+      ],
+      "source_acl_ids": [
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "id": "rb-835674b14104",
+      "action": "CREATE",
+      "principal": "User:svc-orders-relay",
+      "role": "DeveloperWrite",
+      "scope": {
+        "kafka_cluster": "lkc-demo-1"
+      },
+      "resource_patterns": [
+        {
+          "resource_type": "Topic",
+          "name": "orders",
+          "pattern_type": "LITERAL"
+        }
+      ],
+      "source_acl_ids": [
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "id": "rb-3713a985833c",
+      "action": "CREATE",
+      "principal": "User:svc-payments-producer",
+      "role": "DeveloperWrite",
+      "scope": {
+        "kafka_cluster": "lkc-demo-1"
+      },
+      "resource_patterns": [
+        {
+          "resource_type": "Topic",
+          "name": "payments",
+          "pattern_type": "LITERAL"
+        }
+      ],
+      "source_acl_ids": [
+        12,
+        13
+      ]
+    }
+  ],
+  "unmapped": [],
+  "rejected": [
+    {
+      "source_acl_ids": [
+        1
+      ],
+      "reason": "DENY_PERMISSION",
+      "detail": "DENY Read on Topic:pii-events for User:legacy-importer"
+    }
+  ],
+  "warnings": [],
+  "deny_analysis": [
+    {
+      "source_acl_id": 1,
+      "status": "SAFE_TO_REMOVE"
+    }
+  ]
+}

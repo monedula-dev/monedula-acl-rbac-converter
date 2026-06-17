@@ -1,0 +1,11 @@
+# Keep the build context small/fast for examples/converter.Dockerfile.
+# Only the Go sources are needed to build the CLI.
+.git
+.gomodcache
+bin
+runs
+out
+examples/*/out
+examples/*/expected
+docs
+*.md

@@ -1,0 +1,13 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  authorization:
+    type: rbac
+    # Each superuser is read as a cluster-wide ALL ACL, which maps to the
+    # cluster-admin role SystemAdmin.
+    superUsers:
+      - User:svc-platform-admin
+      - User:svc-orders-owner
