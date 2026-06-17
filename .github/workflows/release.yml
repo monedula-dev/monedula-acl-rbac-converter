@@ -64,6 +64,13 @@ jobs:
       # Third-party actions pinned to commit SHA per SLSA L2+ guidance.
       # Comments record the human-readable tag for dependabot to bump.
       - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6  # v4.1.2
+        with:
+          # Pin to the 2.x line. Cosign 3.0 makes the new Sigstore bundle format
+          # the default for `sign-blob`, which ignores --output-signature /
+          # --output-certificate and requires --bundle — breaking the .goreleaser
+          # signs config (and the .sig/.pem verification flow documented in
+          # README "Verifying a release"). 2.6.0 keeps the legacy default.
+          cosign-release: 'v2.6.0'
       - uses: anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610  # v0.24.0
       - uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89  # v7.2.2
         with:
