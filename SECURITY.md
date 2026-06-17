@@ -27,8 +27,8 @@ within 30 days for high-severity issues.
 ## Supported versions
 
 Only the latest released version is supported. Security fixes ship as
-patch releases under semver (the first tagged release is `1.0.0`, so the
-first patch line is `1.0.x`).
+patch releases under semver (the first tagged release is `0.9.0`, so the
+first patch line is `0.9.x`).
 
 ## Out of scope
 

@@ -147,7 +147,7 @@ Each release's `checksums.txt` is signed with [cosign](https://github.com/sigsto
 
 ```sh
 # Fetch the checksums + signature + certificate from the release page
-VERSION=v1.0.0   # check https://github.com/monedula-dev/monedula-acl-rbac-converter/releases/latest
+VERSION=v0.9.0   # check https://github.com/monedula-dev/monedula-acl-rbac-converter/releases/latest
 curl -LO https://github.com/monedula-dev/monedula-acl-rbac-converter/releases/download/$VERSION/checksums.txt
 curl -LO https://github.com/monedula-dev/monedula-acl-rbac-converter/releases/download/$VERSION/checksums.txt.sig
 curl -LO https://github.com/monedula-dev/monedula-acl-rbac-converter/releases/download/$VERSION/checksums.txt.pem
@@ -164,7 +164,7 @@ A successful verification prints `Verified OK`. Then validate the archive you do
 
 ```sh
 # Set ARCHIVE to the file you downloaded (substitute version/os/arch).
-ARCHIVE=monedula-acl-rbac_1.0.0_linux_amd64.tar.gz
+ARCHIVE=monedula-acl-rbac_0.9.0_linux_amd64.tar.gz
 grep "$ARCHIVE" checksums.txt | sha256sum -c -
 # GNU coreutils alternative that skips the artifacts you didn't download:
 # sha256sum --ignore-missing -c checksums.txt

@@ -6,11 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-The entries below are staged for the first tagged release, **1.0.0**. At tag
-time, rename this heading to `## [1.0.0] - YYYY-MM-DD` and start a fresh,
-empty `## [Unreleased]` section above it — see [`RELEASING.md`](RELEASING.md)
-for the full release checklist (CHANGELOG stamp, version sweep, dry-run,
-draft-release review).
+_Nothing yet._
+
+## [0.9.0] - 2026-06-17
+
+First tagged release — a feature-complete preview ahead of `1.0.0`.
 
 ### Added
 
