@@ -4,7 +4,7 @@ go 1.26.3
 
 require (
 	github.com/creack/pty v1.1.24
-	github.com/moby/moby/api v1.54.2
+	github.com/moby/moby/api v1.55.0
 	github.com/pavlo-v-chernykh/keystore-go/v4 v4.5.0
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	github.com/spf13/cobra v1.10.2
