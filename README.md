@@ -115,6 +115,16 @@ For a quick file-to-file render with no run directory, `convert` is the one-shot
 
 ## Install
 
+### Homebrew (macOS / Linux)
+
+```sh
+brew install monedula-dev/tap/monedula-acl-rbac
+```
+
+This taps [`monedula-dev/homebrew-tap`](https://github.com/monedula-dev/homebrew-tap) and installs the latest released binary. On macOS the cask clears the quarantine attribute on install (the binaries are not Apple-notarized), so it runs without a Gatekeeper prompt. Shell completions can be enabled with the [`completion`](#shell-completion) subcommand below.
+
+### Other methods
+
 Download the latest release binary for your platform from the [releases page](https://github.com/monedula-dev/monedula-acl-rbac-converter/releases), or build from source:
 
 ```sh
