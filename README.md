@@ -2,7 +2,6 @@
 
 [![CI](https://github.com/monedula-dev/monedula-acl-rbac-converter/actions/workflows/ci.yml/badge.svg)](https://github.com/monedula-dev/monedula-acl-rbac-converter/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/monedula-dev/monedula-acl-rbac-converter.svg)](https://pkg.go.dev/github.com/monedula-dev/monedula-acl-rbac-converter)
-[![Go Report Card](https://goreportcard.com/badge/github.com/monedula-dev/monedula-acl-rbac-converter)](https://goreportcard.com/report/github.com/monedula-dev/monedula-acl-rbac-converter)
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL%20v3-blue.svg)](LICENSE)
 
 A safe, auditable command-line tool for converting Apache Kafka ACLs into Confluent RBAC role bindings.
