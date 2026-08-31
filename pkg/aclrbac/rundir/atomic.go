@@ -22,11 +22,9 @@ import (
 // filesystems is not atomic and may even fail). On any failure after the
 // temp file is created, it is removed so no .tmp turds accumulate.
 //
-// Windows note: os.Rename fails if the destination already exists. We
-// detect that case and remove the destination before retrying the rename.
-// This widens the (already tiny) window where path does not exist, but the
-// alternative — leaving a half-written file — is the bug this function
-// exists to prevent.
+// Windows note: the final rename cannot replace path while another process
+// holds it open, so it is retried under a wall-clock budget rather than
+// attempted once. See renameWithRetry.
 func WriteAtomic(path string, data []byte, mode os.FileMode) error {
 	dir := filepath.Dir(path)
 	tmp, err := os.CreateTemp(dir, filepath.Base(path)+".tmp.*")
@@ -67,47 +65,56 @@ func WriteAtomic(path string, data []byte, mode os.FileMode) error {
 	return nil
 }
 
-// renameWithRetry renames src over dst. On Windows, MoveFileEx fails with a
-// sharing-violation ("Access is denied") when another process briefly has
-// dst open for reading — a transient condition during concurrent reads of
-// run-dir artefacts. We retry a handful of times with a short backoff. On
-// the older "destination exists" failure mode we remove dst and retry. On
-// non-Windows platforms os.Rename replaces atomically and these branches
+// renameBudget bounds how long renameWithRetry waits for a Windows reader
+// to release the destination. Generous because the failure it prevents is a
+// hard error on an audit-trail write, and cheap because a rename that can
+// succeed does so on the first attempt; only a genuinely held handle waits.
+const renameBudget = 5 * time.Second
+
+// renameWithRetry renames src over dst. On Windows this needs a retry loop:
+// os.Open takes FILE_SHARE_READ|FILE_SHARE_WRITE but not FILE_SHARE_DELETE,
+// so MoveFileEx cannot replace dst while any reader holds it open and fails
+// with ERROR_ACCESS_DENIED ("Access is denied") for the *whole* duration of
+// that reader's open — this is mutual exclusion against readers, not a
+// microsecond interleaving race. A reader that re-opens dst in a tight loop
+// can therefore starve a fixed number of attempts, so the budget is
+// wall-clock (renameBudget) rather than an attempt count: a slow or loaded
+// machine gets proportionally more chances instead of the same handful.
+// On the older "destination exists" failure mode we remove dst and retry.
+// On non-Windows platforms os.Rename replaces atomically and these branches
 // are never exercised.
 func renameWithRetry(src, dst string) error {
-	// On non-Windows, os.Rename replaces atomically in a single attempt;
-	// no retry loop is needed and a failure is a real error.
 	if runtime.GOOS != "windows" {
 		return os.Rename(src, dst)
 	}
-	// Windows: a reader holding dst open (even a transient os.ReadFile) can
-	// make MoveFileEx return ERROR_ACCESS_DENIED / sharing violation. The
-	// window is microseconds for a realistic single reader, but heavy
-	// concurrent readers can starve several attempts in a row, so the budget
-	// is generous: 50 attempts with a backoff that ramps to and holds at
-	// 10ms (~0.5s worst case). The destructive callers (status reading a
-	// run dir while plan --revalidate rewrites it) are nowhere near that
-	// contended in practice.
-	const attempts = 50
-	var lastErr error
-	for i := 0; i < attempts; i++ {
+
+	start := time.Now()
+	const maxBackoff = 10 * time.Millisecond
+	backoff := time.Millisecond
+	for {
 		err := os.Rename(src, dst)
 		if err == nil {
 			return nil
 		}
-		lastErr = err
-		// Older "destination exists" failure mode: remove dst and retry now.
+		if elapsed := time.Since(start); elapsed >= renameBudget {
+			// Name the wait in the error: an operator seeing this has a
+			// process holding the artefact open (an editor, a virus
+			// scanner, another monedula-acl-rbac run), not a flaky disk.
+			return fmt.Errorf("after waiting %s for another process to release it: %w", elapsed.Round(time.Millisecond), err)
+		}
+		// Older "destination exists" failure mode: remove dst and retry
+		// immediately, without spending the backoff.
 		if os.IsExist(err) {
 			if rmErr := os.Remove(dst); rmErr == nil {
 				continue
 			}
 		}
-		// Sharing violation / access denied: back off briefly and retry.
-		backoff := time.Duration(i+1) * time.Millisecond
-		if backoff > 10*time.Millisecond {
-			backoff = 10 * time.Millisecond
-		}
 		time.Sleep(backoff)
+		if backoff < maxBackoff {
+			backoff *= 2
+			if backoff > maxBackoff {
+				backoff = maxBackoff
+			}
+		}
 	}
-	return lastErr
 }

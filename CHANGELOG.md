@@ -10,9 +10,23 @@ _Nothing yet._
 
 ## [0.10.0] - 2026-08-31
 
-A maintenance release on top of `0.9.0`: no behavioural change to the CLI,
-its artefact schemas, or its safety gates — only dependency and CI-toolchain
-updates, rebuilt and re-signed.
+A maintenance release on top of `0.9.0`: one Windows durability fix, plus
+dependency and CI-toolchain updates. No change to the artefact schemas or
+the safety gates.
+
+### Fixed
+
+- **Atomic writes no longer fail on Windows while another process holds the
+  artefact open.** `os.Open` on Windows takes no `FILE_SHARE_DELETE`, so the
+  rename that publishes `plan.json` / `acls.json` / `verify.json` is blocked
+  for as long as any reader (a `status` run, an editor, a virus scanner)
+  holds the file open — not for the microseconds an interleaving race would.
+  The retry budget was a fixed 50 attempts (~0.5s of wall clock) and could be
+  exhausted on a loaded machine, surfacing `rename ...: Access is denied` and
+  failing the write. It is now a 5s wall-clock budget, so slower machines get
+  proportionally more chances instead of the same handful of attempts, and the
+  error names the wait when it does give up. Unix behaviour is unchanged
+  (rename over an open file always succeeds there).
 
 ### Changed
 

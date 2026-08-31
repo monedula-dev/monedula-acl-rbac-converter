@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/monedula-dev/monedula-acl-rbac-converter/pkg/aclrbac/rundir"
 )
@@ -86,6 +87,49 @@ func TestWriteAtomic_NoTempLeftBehind(t *testing.T) {
 		if e.Name() != "plan.json" {
 			t.Errorf("unexpected leftover file in run dir: %q", e.Name())
 		}
+	}
+}
+
+// TestWriteAtomic_SucceedsWhileReaderHoldsFileOpen pins the rename budget
+// against a reader that holds the destination open for a sustained period.
+//
+// On Windows os.Open takes FILE_SHARE_READ|FILE_SHARE_WRITE but *not*
+// FILE_SHARE_DELETE, so MoveFileEx cannot replace the destination for as
+// long as any reader holds it open — the block lasts the whole open, not
+// the microseconds an interleaving race would. WriteAtomic must wait such
+// a reader out rather than surfacing "Access is denied" to the caller.
+// On non-Windows platforms rename over an open file always succeeds and
+// this test passes without exercising the retry loop.
+func TestWriteAtomic_SucceedsWhileReaderHoldsFileOpen(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "plan.json")
+	if err := rundir.WriteAtomic(path, []byte("old"), 0o600); err != nil {
+		t.Fatalf("seed WriteAtomic: %v", err)
+	}
+
+	// Held long enough to exhaust a short fixed-attempt retry budget.
+	const hold = 1500 * time.Millisecond
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatalf("open reader: %v", err)
+	}
+	released := make(chan struct{})
+	go func() {
+		defer close(released)
+		time.Sleep(hold)
+		_ = f.Close()
+	}()
+	t.Cleanup(func() { <-released })
+
+	if err := rundir.WriteAtomic(path, []byte("new"), 0o600); err != nil {
+		t.Fatalf("WriteAtomic while a reader held %s open for %s: %v", path, hold, err)
+	}
+	got, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read back: %v", err)
+	}
+	if string(got) != "new" {
+		t.Errorf("content = %q, want %q", got, "new")
 	}
 }
 
