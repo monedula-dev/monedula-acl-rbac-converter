@@ -8,6 +8,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 _Nothing yet._
 
+## [0.10.0] - 2026-08-31
+
+A maintenance release on top of `0.9.0`: no behavioural change to the CLI,
+its artefact schemas, or its safety gates — only dependency and CI-toolchain
+updates, rebuilt and re-signed.
+
+### Changed
+
+- **Kubernetes client** bumped to `k8s.io/client-go` and
+  `k8s.io/apimachinery` v0.37.0 (from v0.36.2), with the matching
+  `kube-openapi`, `utils`, and `structured-merge-diff` updates. Affects the
+  Strimzi `KafkaUser`, CFK-manifest, and live-Kubernetes extractors.
+- **Kafka client** `github.com/twmb/franz-go` bumped to v1.21.6 (from
+  v1.21.3) — used by the live-cluster extractor.
+- **Keystore support** `software.sslmate.com/src/go-pkcs12` bumped to
+  v0.7.3, used for PKCS12 truststore/keystore loading.
+- **Transitive updates** across `golang.org/x/*` (crypto, net, oauth2, sys,
+  term, text, time), OpenTelemetry v1.44.0, and the `go-openapi/swag` split
+  into per-concern modules.
+- **Test-only dependencies** `testcontainers-go` and its Kafka module bumped
+  to v0.44.0, and `github.com/moby/moby/api` to v1.55.0 — integration and
+  e2e suites only, not shipped in the binary.
+
+### Build
+
+- Release and CI workflows moved to `actions/setup-go` v7,
+  `golangci/golangci-lint-action` v9.3.0,
+  `goreleaser/goreleaser-action` v7.2.3, and
+  `anchore/sbom-action/download-syft` v0.24.2. Third-party actions stay
+  pinned to commit SHAs per SLSA L2+ guidance.
+
 ## [0.9.0] - 2026-06-17
 
 First tagged release — a feature-complete preview ahead of `1.0.0`.

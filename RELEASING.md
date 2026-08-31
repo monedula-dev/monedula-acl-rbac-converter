@@ -12,8 +12,8 @@ goreleaser signs anything. The steps below are the manual pieces between
 
 Before tagging, on a clean working tree of `main`:
 
-1. **Pick the version.** Semver. The first tagged release is `1.0.0`;
-   subsequent releases follow `MAJOR.MINOR.PATCH`.
+1. **Pick the version.** Semver, `MAJOR.MINOR.PATCH`, tagged with a `v`
+   prefix.
 2. **Stamp the CHANGELOG.** In `CHANGELOG.md`, rename the existing
    `## [Unreleased]` heading to `## [X.Y.Z] - YYYY-MM-DD` (the date the
    release will publish) and add a fresh empty `## [Unreleased]` section
