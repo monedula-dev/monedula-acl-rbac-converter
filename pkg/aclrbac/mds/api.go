@@ -15,18 +15,23 @@ import (
 // CreateRoleBinding POSTs a binding to MDS. Returns nil on 2xx, or a typed
 // error otherwise.
 func CreateRoleBinding(cl *Client, b types.Binding) error {
-	body := mdsBindingBody{
-		Scope:            scopeToMDS(b.Scope),
-		ResourcePatterns: patternsToMDS(b.ResourcePatterns),
-	}
-	path := fmt.Sprintf("/security/1.0/principals/%s/roles/%s/bindings",
-		url.PathEscape(b.Principal), url.PathEscape(b.Role))
-	resp, err := cl.Post(path, body)
+	resp, err := cl.Post(RoleBindingRequest(b))
 	if err != nil {
 		return err
 	}
 	resp.Body.Close()
 	return nil
+}
+
+// RoleBindingRequest returns the path and JSON body CreateRoleBinding POSTs
+// for b, so a dry run can show exactly the request a real apply would send.
+func RoleBindingRequest(b types.Binding) (path string, body interface{}) {
+	path = fmt.Sprintf("/security/1.0/principals/%s/roles/%s/bindings",
+		url.PathEscape(b.Principal), url.PathEscape(b.Role))
+	return path, mdsBindingBody{
+		Scope:            scopeToMDS(b.Scope),
+		ResourcePatterns: patternsToMDS(b.ResourcePatterns),
+	}
 }
 
 // ListBindings returns the role bindings a principal holds at the given scope.
