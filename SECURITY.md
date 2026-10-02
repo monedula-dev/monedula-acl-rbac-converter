@@ -27,7 +27,7 @@ within 30 days for high-severity issues.
 ## Supported versions
 
 Only the latest released version is supported. Security fixes ship as
-patch releases under semver (the current release line is `0.10.x`).
+patch releases under semver (the current release line is `0.11.x`).
 
 ## Out of scope
 
