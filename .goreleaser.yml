@@ -80,6 +80,37 @@ signs:
       - "--yes"
     output: true
 
+# Homebrew cask published to the monedula-dev/homebrew-tap repo. Casks (not the
+# deprecated `brews` formula) are used deliberately: this tool ships prebuilt
+# binaries rather than building from source, and the macOS binaries are NOT
+# Apple-notarized (cosign signs checksums.txt, not the binaries for Gatekeeper),
+# so the post-install hook below strips the com.apple.quarantine bit to avoid
+# "cannot be opened because the developer cannot be verified" errors.
+#
+# Publishing to a *separate* repo needs a PAT with write access to the tap repo
+# (the workflow's default GITHUB_TOKEN is scoped to this repo only). The release
+# workflow passes it as HOMEBREW_TAP_TOKEN — create a repo/fine-grained
+# PAT with Contents:write on monedula-dev/homebrew-tap and store it as that
+# repository secret. Install: `brew install monedula-dev/tap/monedula-acl-rbac`.
+homebrew_casks:
+  - name: monedula-acl-rbac
+    repository:
+      owner: monedula-dev
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: "https://github.com/monedula-dev/monedula-acl-rbac-converter"
+    description: "A safe, auditable command-line tool for converting Apache Kafka ACLs into Confluent RBAC role bindings."
+    license: "AGPL-3.0-or-later"
+    commit_author:
+      name: goreleaser-bot
+      email: noreply@monedula.dev
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/monedula-acl-rbac"]
+          end
+
 changelog:
   # github-native derives the "What's Changed" list from merged PRs/commits
   # since the previous tag. For subsequent releases this is exactly right; for
