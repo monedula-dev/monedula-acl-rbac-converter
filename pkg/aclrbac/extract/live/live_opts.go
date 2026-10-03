@@ -5,6 +5,8 @@ package live
 
 import (
 	"crypto/tls"
+	"crypto/x509"
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -34,7 +36,8 @@ import (
 //   - ssl.key.password (PEM only; non-empty value is rejected with a
 //     pointer to `openssl rsa -in encrypted.pem -out decrypted.pem`)
 //   - ssl.endpoint.identification.algorithm ("" disables hostname
-//     verification — printed to stderr as a loud warning)
+//     verification but keeps chain verification, as in Java — printed
+//     to stderr as a loud warning)
 //
 // Any other recognized key combination — an unsupported SASL mechanism,
 // an unrecognised store extension — surfaces as an error rather than
@@ -159,13 +162,40 @@ func buildTLSConfig(props map[string]string, used map[string]bool) (*tls.Config,
 	if v, set := props["ssl.endpoint.identification.algorithm"]; set {
 		used["ssl.endpoint.identification.algorithm"] = true
 		if strings.TrimSpace(v) == "" {
-			cfg.InsecureSkipVerify = true //nolint:gosec // explicit operator opt-in via empty algorithm setting
+			// Java's empty-string convention skips only the hostname check;
+			// the chain is still validated against the truststore. crypto/tls
+			// has no hostname-only switch, so turn its verification off and
+			// redo the chain check, minus the hostname, in VerifyConnection.
+			cfg.InsecureSkipVerify = true //nolint:gosec // chain still verified in VerifyConnection
+			cfg.VerifyConnection = verifyChainOnly(cfg.RootCAs)
 			log.Warn("hostname verification disabled via ssl.endpoint.identification.algorithm=''",
-				"impact", "connections vulnerable to MITM; this is what Java's empty-string convention means")
+				"impact", "certificate chain is still verified, but any trusted certificate is accepted for any broker host")
 		}
 	}
 
 	return cfg, nil
+}
+
+// verifyChainOnly verifies the server's certificate chain against roots
+// (nil means the system roots, as in crypto/tls) without checking the
+// hostname.
+func verifyChainOnly(roots *x509.CertPool) func(tls.ConnectionState) error {
+	return func(cs tls.ConnectionState) error {
+		if len(cs.PeerCertificates) == 0 {
+			return errors.New("tls: server presented no certificate")
+		}
+		opts := x509.VerifyOptions{
+			Roots:         roots,
+			Intermediates: x509.NewCertPool(),
+		}
+		for _, c := range cs.PeerCertificates[1:] {
+			opts.Intermediates.AddCert(c)
+		}
+		if _, err := cs.PeerCertificates[0].Verify(opts); err != nil {
+			return fmt.Errorf("tls: verify server certificate chain: %w", err)
+		}
+		return nil
+	}
 }
 
 // buildSASLMechanism returns the franz-go sasl.Mechanism implied by

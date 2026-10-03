@@ -21,12 +21,14 @@ Before tagging, on a clean working tree of `main`:
 3. **Sweep version-references.** Search the tree for the previous version
    string and the new one to catch any forgotten doc updates:
    ```sh
-   grep -rn 'v[0-9]\+\.[0-9]\+\.[0-9]\+' README.md QUICKSTART.md SECURITY.md \
+   grep -rnE 'v?[0-9]+\.[0-9]+\.([0-9]+|x)' README.md QUICKSTART.md SECURITY.md \
         CONTRIBUTING.md CHANGELOG.md
    ```
+   The `v` is optional in the pattern because several references omit it.
    The README install snippet (`VERSION=...`), the CHANGELOG headings, the
    verification example archive (`monedula-acl-rbac_<ver>_<os>_<arch>...`),
-   and the cosign certificate-identity regex should all agree.
+   SECURITY.md's supported release line (`X.Y.x`), and the cosign
+   certificate-identity regex should all agree.
 4. **Run the local gate.**
    ```sh
    make lint
