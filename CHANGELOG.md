@@ -8,6 +8,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 _Nothing yet._
 
+## [0.11.0] - 2026-10-02
+
+A security and maintenance release on top of `0.10.0`: a TLS fix in the
+live extractor that anyone setting `ssl.endpoint.identification.algorithm=`
+should pick up, a dry-run logging fix, and dependency updates. No change to
+the artefact schemas or the safety gates.
+
+### Security
+
+- **`extract --from live` now validates the broker's certificate chain when
+  hostname verification is disabled.** An empty
+  `ssl.endpoint.identification.algorithm` in the `--command-config` file
+  turned off *all* certificate verification — the configured
+  `ssl.truststore.location` was loaded and then ignored — rather than only
+  the hostname check, as it does for Java clients. With `SASL_SSL`, a
+  man-in-the-middle could present any certificate and capture the extraction
+  principal's credentials. The chain is now verified against the truststore
+  (or the system roots when none is configured), including intermediates the
+  broker sends; only the hostname check is skipped. Affects 0.9.0 and
+  0.10.0. **Behaviour change:** a connection that only succeeded because
+  verification was off — a broker certificate that does not chain to the
+  configured truststore — now fails the handshake; add the issuing CA to the
+  truststore.
+
+### Fixed
+
+- **`apply --dry-run` logs the request a real apply sends.**
+  `would-apply.log` showed a snake_case body (`resource_patterns`,
+  `scope.kafka_cluster`) and an unescaped principal — a request MDS rejects
+  with HTTP 400 — instead of the camelCase body and percent-escaped path that
+  `apply --confirm` POSTs. Both now come from the same request builder.
+
+### Changed
+
+- **Kafka client** `github.com/twmb/franz-go` bumped to v1.22.0 (from
+  v1.21.6), with `kadm` v1.19.0 and `kmsg` v1.14.0 — used by the
+  live-cluster extractor. Upstream's behaviour changes in this release are
+  consumer/producer-side; the extractor uses only the admin ACL APIs.
+- **Kubernetes client** `k8s.io/client-go` and `k8s.io/apimachinery` bumped
+  to v0.37.1 (from v0.37.0).
+- **Shell parser** `mvdan.cc/sh/v3` bumped to v3.14.1 (from v3.13.1), used
+  to read `kafka-acls --add` setup scripts.
+- **Other updates**: `golang.org/x/term` v0.46.0, `golang.org/x/sys`
+  v0.48.0, `klauspost/compress` v1.20.0, and `pierrec/lz4` v4.1.30.
+- **Test-only dependencies** `github.com/moby/moby/api` bumped to v1.56.0 and
+  `github.com/moby/go-archive` to v0.3.3, the latter resolving
+  GHSA-hfg8-hc9c-6c3h. Both come in through the testcontainers integration
+  harness and are not shipped in the binary.
+
+### Build
+
+- CI and integration workflows now run with a read-only `GITHUB_TOKEN`
+  (`permissions: contents: read`).
+- The README drops the retired Go Report Card badge.
+
 ## [0.10.0] - 2026-08-31
 
 A maintenance release on top of `0.9.0`: one Windows durability fix, plus

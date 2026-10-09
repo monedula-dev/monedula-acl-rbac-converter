@@ -77,12 +77,9 @@ func DryRun(opts Options) error {
 			results = append(results, BindingResult{BindingID: b.ID, Principal: b.Principal, Role: b.Role, Status: StatusWouldSkip})
 			continue
 		}
-		body, _ := json.Marshal(struct {
-			Scope            types.Scope             `json:"scope"`
-			ResourcePatterns []types.ResourcePattern `json:"resource_patterns"`
-		}{b.Scope, b.ResourcePatterns})
-		fmt.Fprintf(f, "WOULD POST /security/1.0/principals/%s/roles/%s/bindings\nBODY %s\n",
-			b.Principal, b.Role, body)
+		path, req := mds.RoleBindingRequest(b)
+		body, _ := json.Marshal(req)
+		fmt.Fprintf(f, "WOULD POST %s\nBODY %s\n", path, body)
 		results = append(results, BindingResult{BindingID: b.ID, Principal: b.Principal, Role: b.Role, Status: StatusWouldCreate})
 	}
 

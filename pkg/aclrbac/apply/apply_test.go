@@ -5,6 +5,7 @@ package apply_test
 
 import (
 	"bytes"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -123,6 +124,54 @@ func TestApply_DryRunWritesWouldApplyLog(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(dir, "would-apply.log")); err != nil {
 		t.Errorf("would-apply.log not written: %v", err)
+	}
+}
+
+// TestApply_DryRunLogsTheRequestApplySends pins would-apply.log to the exact
+// request a real apply POSTs: the percent-escaped path and the camelCase MDS
+// body with hyphenated cluster keys. Logging the plan.json (snake_case) shape
+// instead misleads anyone replaying the log — MDS rejects it with HTTP 400.
+func TestApply_DryRunLogsTheRequestApplySends(t *testing.T) {
+	const (
+		wantPath = "/security/1.0/principals/User:CN=alice%2COU=eng/roles/DeveloperRead/bindings"
+		wantBody = `{"scope":{"clusters":{"kafka-cluster":"lkc-kafka01"}},"resourcePatterns":[{"resourceType":"Topic","name":"orders","patternType":"LITERAL"}]}`
+	)
+	var gotPath, gotBody string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, "/bindings") {
+			body, _ := io.ReadAll(r.Body)
+			gotPath, gotBody = r.URL.EscapedPath(), string(body)
+			w.WriteHeader(204)
+			return
+		}
+		_, _ = w.Write([]byte(`{"rolebindings":{}}`))
+	}))
+	defer srv.Close()
+
+	dir := t.TempDir()
+	planPath := filepath.Join(dir, "plan.json")
+	p := samplePlan()
+	p.Bindings[0].Principal = "User:CN=alice,OU=eng"
+	mustWritePlanAndChecksum(t, planPath, p)
+	cl, _ := mds.NewClient(mds.Config{URL: srv.URL, Token: "t"})
+	opts := apply.Options{RunDir: dir, PlanPath: planPath, Client: cl}
+
+	if err := apply.DryRun(opts); err != nil {
+		t.Fatalf("dryrun: %v", err)
+	}
+	logData, err := os.ReadFile(filepath.Join(dir, "would-apply.log"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := "WOULD POST " + wantPath + "\nBODY " + wantBody + "\n"; !strings.Contains(string(logData), want) {
+		t.Errorf("would-apply.log does not show the real request\nwant:\n%s\ngot:\n%s", want, logData)
+	}
+
+	if err := apply.Run(opts); err != nil {
+		t.Fatalf("apply: %v", err)
+	}
+	if gotPath != wantPath || gotBody != wantBody {
+		t.Errorf("apply sent a different request than dry-run logged\npath: %s\nbody: %s", gotPath, gotBody)
 	}
 }
 
