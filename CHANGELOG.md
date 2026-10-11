@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 _Nothing yet._
 
-## [0.11.0] - 2026-10-02
+## [0.11.0] - 2026-10-11
 
 A security and maintenance release on top of `0.10.0`: a TLS fix in the
 live extractor that anyone setting `ssl.endpoint.identification.algorithm=`
@@ -42,7 +42,7 @@ the artefact schemas or the safety gates.
 
 ### Changed
 
-- **Kafka client** `github.com/twmb/franz-go` bumped to v1.22.0 (from
+- **Kafka client** `github.com/twmb/franz-go` bumped to v1.22.1 (from
   v1.21.6), with `kadm` v1.19.0 and `kmsg` v1.14.0 — used by the
   live-cluster extractor. Upstream's behaviour changes in this release are
   consumer/producer-side; the extractor uses only the admin ACL APIs.
@@ -52,7 +52,7 @@ the artefact schemas or the safety gates.
   to read `kafka-acls --add` setup scripts.
 - **Other updates**: `golang.org/x/term` v0.46.0, `golang.org/x/sys`
   v0.48.0, `klauspost/compress` v1.20.0, and `pierrec/lz4` v4.1.30.
-- **Test-only dependencies** `github.com/moby/moby/api` bumped to v1.56.0 and
+- **Test-only dependencies** `github.com/moby/moby/api` bumped to v1.56.1 and
   `github.com/moby/go-archive` to v0.3.3, the latter resolving
   GHSA-hfg8-hc9c-6c3h. Both come in through the testcontainers integration
   harness and are not shipped in the binary.
@@ -61,6 +61,8 @@ the artefact schemas or the safety gates.
 
 - CI and integration workflows now run with a read-only `GITHUB_TOKEN`
   (`permissions: contents: read`).
+- Release workflow moved to `anchore/sbom-action/download-syft` v0.24.3
+  (pinned to its commit SHA).
 - The README drops the retired Go Report Card badge.
 
 ## [0.10.0] - 2026-08-31
