@@ -72,6 +72,10 @@ signs:
   - id: checksums
     cmd: cosign
     artifacts: checksum
+    # Without `certificate`, ${certificate} expands to "" and cosign writes no
+    # certificate, so the release ships no checksums.txt.pem (as happened for
+    # 0.9.0 and 0.10.0) and the README's verify-blob command can't run.
+    certificate: "${artifact}.pem"
     args:
       - sign-blob
       - "--output-signature=${signature}"

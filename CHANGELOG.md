@@ -39,6 +39,11 @@ the artefact schemas or the safety gates.
   `scope.kafka_cluster`) and an unescaped principal — a request MDS rejects
   with HTTP 400 — instead of the camelCase body and percent-escaped path that
   `apply --confirm` POSTs. Both now come from the same request builder.
+- **Releases now ship `checksums.txt.pem`.** The goreleaser signing config
+  never named a certificate file, so 0.9.0 and 0.10.0 published
+  `checksums.txt.sig` without the keyless-signing certificate that
+  [Verifying a release](README.md#verifying-a-release) downloads and passes
+  to `cosign verify-blob`. Releases from 0.11.0 on include it.
 
 ### Changed
 
