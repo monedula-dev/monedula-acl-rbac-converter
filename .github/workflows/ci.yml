@@ -26,6 +26,10 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version: '1.26.x'
+          # Resolve 1.26.x against setup-go's version manifest, not the Go
+          # cached on the runner image, which lags patch releases. setup-go
+          # sets GOTOOLCHAIN=local, so a stale Go fails go.mod's minimum.
+          check-latest: true
           cache: true
       - run: go run ./tools/sync-schemas
       - run: git diff --exit-code

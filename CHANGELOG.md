@@ -57,6 +57,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI and release workflows moved to `goreleaser/goreleaser-action` v7.3.0,
   and the release workflow to `sigstore/cosign-installer` v4.1.3 (both
   pinned to their commit SHAs).
+- CI, integration and release workflows set `check-latest` on
+  `actions/setup-go`, so `1.26.x` resolves to the newest patch instead of
+  the Go cached on the runner image, which lagged behind `go.mod`'s
+  minimum and failed every job.
 
 ## [0.11.0] - 2026-10-11
 
