@@ -6,7 +6,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_Nothing yet._
+### Changed
+
+- **Minimum Go version** raised to 1.26.11 (from 1.26.3) in `go.mod`, so
+  source builds and `go install` pick up the standard-library security
+  fixes in 1.26.4–1.26.11 (`net/http`, `net/textproto`, `net/url`,
+  `crypto/tls`, `crypto/x509`). CI already builds with the newest `1.26.x`.
+- **`golang.org/x/net`** bumped to v0.62.0 (from v0.57.0), resolving the
+  HTTP/2 advisories GO-2026-6603, GO-2026-6610, GO-2026-6611, GO-2026-6612
+  and GO-2026-6617. Used by `k8s.io/client-go` in the live-Kubernetes
+  extractor.
+- **`klauspost/compress`** bumped to v1.20.4 (from v1.20.0), resolving
+  GO-2026-6865 (panic on two-block frames). Used by the Kafka client in the
+  live-cluster extractor.
+- **Kafka client** `github.com/twmb/franz-go` bumped to v1.22.3 (from
+  v1.22.1), with `kadm` v1.20.0 and `kmsg` v1.15.1.
+- **Kubernetes client** `k8s.io/client-go` and `k8s.io/apimachinery` bumped
+  to v0.37.2 (from v0.37.1). `kube-openapi` stays at the version client-go
+  pins; its newest snapshot requires Go 1.27.
+- **Keystore support** `software.sslmate.com/src/go-pkcs12` bumped to
+  v0.7.4.
+- **Other updates**: `golang.org/x/crypto` v0.59.0, `golang.org/x/sys`
+  v0.50.0, `golang.org/x/term` v0.48.0, `golang.org/x/text` v0.44.0, and
+  `pierrec/lz4` v4.1.33.
+- **Test-only dependencies** `testcontainers-go` and its Kafka module bumped
+  to v0.45.0, and OpenTelemetry (pulled in by testcontainers) to v1.47.0 —
+  integration and e2e suites only, not shipped in the binary.
+
+### Build
+
+- CI and release workflows moved to `goreleaser/goreleaser-action` v7.3.0,
+  and the release workflow to `sigstore/cosign-installer` v4.1.3 (both
+  pinned to their commit SHAs).
 
 ## [0.11.0] - 2026-10-11
 
