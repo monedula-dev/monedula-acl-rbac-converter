@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.20.0] - 2026-11-12
+
+A security and maintenance release on top of `0.11.0`: the MDS client no
+longer follows redirects that could leak MDS credentials, `--mds-url` is
+validated before anything uses it, and the minimum Go version moves to
+1.26.11 alongside dependency updates that clear every advisory
+`govulncheck` reported. `--mds-url` values with embedded credentials, a
+query or fragment, or no `http://`/`https://` scheme are now rejected (see
+Security). No change to the artefact schemas or the safety gates.
+
 ### Security
 
 - **The MDS client no longer follows HTTP redirects.** Go's HTTP client
