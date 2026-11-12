@@ -79,3 +79,8 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # PAT with Contents:write on monedula-dev/homebrew-tap. The default
+          # GITHUB_TOKEN above is scoped to this repo only and cannot push the
+          # Homebrew cask to the separate tap repo. See `homebrew_casks` in
+          # .goreleaser.yml.
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
