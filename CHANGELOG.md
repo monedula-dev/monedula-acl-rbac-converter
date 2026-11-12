@@ -6,6 +6,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **The MDS client no longer follows HTTP redirects.** Go's HTTP client
+  keeps the `Authorization` header on a redirect to the same hostname on
+  any port or scheme, so a redirecting MDS endpoint could hand the bearer
+  token, or the Basic-auth password during the token exchange, to another
+  service on that host, possibly over plain `http`. A 3xx from MDS is now
+  an error that names the redirect target; point `--mds-url` at the MDS
+  listener directly.
+- **`--mds-url` is validated up front.** It must be an `http://` or
+  `https://` URL with a host and no embedded credentials, query or
+  fragment. Previously a value like `mds.example.com:8090` failed later
+  with an opaque "unsupported protocol scheme" error, and credentials in
+  the URL could surface in error messages, `verify.json` and `apply.log`.
+  `delete-deny-acls` applies the same check before it writes
+  `runtime.env` and the generated script, which both record the URL, so
+  a rejected URL no longer yields scripts that fail only when run. The
+  rejection message never repeats the URL.
+
 ### Changed
 
 - **Minimum Go version** raised to 1.26.11 (from 1.26.3) in `go.mod`, so

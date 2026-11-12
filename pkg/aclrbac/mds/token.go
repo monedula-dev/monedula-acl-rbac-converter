@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -114,16 +113,14 @@ func exchange(cfg AuthConfig) (Token, error) {
 		password = strings.TrimRight(string(pw), "\n\r")
 	}
 
-	endpoint, err := url.Parse(cfg.URL)
-	if err != nil {
-		return Token{}, fmt.Errorf("parse mds url: %w", err)
-	}
-	endpoint.Path = strings.TrimRight(endpoint.Path, "/") + "/security/1.0/authenticate"
-
+	// NewClient validates cfg.URL (see parseBaseURL) and refuses redirects,
+	// so the Basic-auth header below only ever reaches the configured MDS.
 	tlsCl, err := NewClient(Config{URL: cfg.URL, CACertPath: cfg.CACertPath, ClientCertPath: cfg.ClientCertPath, ClientKeyPath: cfg.ClientKeyPath, InsecureSkipVerify: cfg.InsecureSkipVerify})
 	if err != nil {
 		return Token{}, err
 	}
+	endpoint := *tlsCl.base
+	endpoint.Path = strings.TrimRight(endpoint.Path, "/") + "/security/1.0/authenticate"
 
 	req, _ := http.NewRequest(http.MethodGet, endpoint.String(), nil)
 	creds := cfg.User + ":" + password

@@ -89,9 +89,9 @@ func NewClient(cfg Config) (*Client, error) {
 	if cfg.URL == "" {
 		return nil, fmt.Errorf("mds: URL is required")
 	}
-	base, err := url.Parse(cfg.URL)
+	base, err := parseBaseURL(cfg.URL)
 	if err != nil {
-		return nil, fmt.Errorf("mds: parse URL: %w", err)
+		return nil, err
 	}
 	tlsCfg, err := buildTLSConfig(cfg)
 	if err != nil {
@@ -112,6 +112,14 @@ func NewClient(cfg Config) (*Client, error) {
 			// don't leak idle connections on long verify/apply runs.
 			MaxIdleConns:    100,
 			IdleConnTimeout: 90 * time.Second,
+		},
+		// None of the MDS endpoints we call redirect, so refuse to follow one.
+		// net/http keeps the Authorization header on a redirect to the same
+		// hostname (any port, any scheme) or a subdomain of it, so following
+		// would hand the bearer token or Basic-auth password to whatever the
+		// Location names there — possibly over plain http.
+		CheckRedirect: func(req *http.Request, _ []*http.Request) error {
+			return fmt.Errorf("mds: refusing to follow redirect to %s; point --mds-url at the MDS listener directly", req.URL.Redacted())
 		},
 	}
 	if cfg.InsecureSkipVerify {
@@ -147,6 +155,50 @@ func NewClient(cfg Config) (*Client, error) {
 		retryAfterCap: retryAfterCap,
 		roleOpsCache:  map[string]map[types.ResourceType]map[types.Operation]bool{},
 	}, nil
+}
+
+// ValidateBaseURL reports whether raw is acceptable as the MDS base URL
+// (--mds-url), applying the same rules as NewClient. Callers that persist
+// the URL before any client is built, such as delete-deny-acls writing
+// runtime.env and the script header, use it to fail at generation time.
+func ValidateBaseURL(raw string) error {
+	_, err := parseBaseURL(raw)
+	return err
+}
+
+// parseBaseURL validates the operator-supplied MDS base URL. Every request
+// goes to this one origin (api.go only appends escaped path segments), so
+// pinning it to a plain http(s) host keeps requests and their credentials on
+// MDS. Userinfo is refused because it would be echoed into error messages,
+// verify.json and apply.log; a query or fragment would ride along on every
+// call.
+//
+// Errors never quote raw: a rejected URL can still carry a secret that the
+// checks above cannot see as userinfo — "alice:pw@host:8090" parses as
+// scheme "alice" with opaque "pw@host:8090" — or a token in its query.
+func parseBaseURL(raw string) (*url.URL, error) {
+	u, err := url.Parse(raw)
+	if err != nil {
+		// *url.Error quotes the whole input; keep only the reason.
+		var uerr *url.Error
+		if errors.As(err, &uerr) {
+			err = uerr.Err
+		}
+		return nil, fmt.Errorf("mds: parse URL: %w", err)
+	}
+	if u.User != nil {
+		return nil, fmt.Errorf("mds: URL must not embed credentials; use --mds-user/--mds-password-file or --mds-token-file")
+	}
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return nil, fmt.Errorf("mds: URL must start with http:// or https://")
+	}
+	if u.Host == "" {
+		return nil, fmt.Errorf("mds: URL has no host")
+	}
+	if u.RawQuery != "" || u.ForceQuery || u.Fragment != "" {
+		return nil, fmt.Errorf("mds: URL must not include a query or fragment")
+	}
+	return u, nil
 }
 
 func buildTLSConfig(cfg Config) (*tls.Config, error) {

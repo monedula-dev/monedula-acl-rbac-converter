@@ -9,6 +9,8 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -205,4 +207,31 @@ func isolateUserConfigDir(t *testing.T) {
 	t.Setenv("HOME", dir)
 	// Windows (returns %AppData%)
 	t.Setenv("AppData", dir)
+}
+
+// TestResolveToken_ExchangeRefusesRedirect pins that the password exchange
+// never follows a redirect: the Basic-auth header would otherwise be
+// replayed to the redirect target (same hostname, different port here).
+func TestResolveToken_ExchangeRefusesRedirect(t *testing.T) {
+	var targetAuth atomic.Value
+	target := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		targetAuth.Store(r.Header.Get("Authorization"))
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"auth_token": "stolen"})
+	}))
+	defer target.Close()
+	origin := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, target.URL+r.URL.Path, http.StatusFound)
+	}))
+	defer origin.Close()
+
+	_, err := mds.ResolveToken(mds.AuthConfig{URL: origin.URL, User: "alice", Password: "hunter2"})
+	if err == nil {
+		t.Fatal("expected an error for a redirected authenticate call")
+	}
+	if strings.Contains(err.Error(), "hunter2") {
+		t.Errorf("error leaks the password: %v", err)
+	}
+	if got := targetAuth.Load(); got != nil {
+		t.Errorf("redirect target was contacted (Authorization %q)", got)
+	}
 }

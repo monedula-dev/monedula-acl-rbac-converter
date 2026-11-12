@@ -668,6 +668,52 @@ func TestGenerate_RejectsWhitespaceOnlyMDSURL(t *testing.T) {
 	}
 }
 
+// TestGenerate_RejectsUnsafeMDSURL pins that delete-deny-acls applies the
+// same --mds-url validation as the MDS client, at generation time. The URL
+// is written into runtime.env and the generated script's header, so a URL
+// with embedded credentials must be refused before anything is written,
+// and a URL the client would refuse must not produce scripts that only
+// fail when an operator runs them.
+func TestGenerate_RejectsUnsafeMDSURL(t *testing.T) {
+	for _, raw := range []string{
+		"mds.example.com:8090",
+		"ftp://mds.example.com",
+		"https://alice:hunter2@mds.example.com",
+		"alice:hunter2@mds.example.com:8090",
+		"https://mds.example.com/?x=1",
+	} {
+		t.Run(raw, func(t *testing.T) {
+			dir := t.TempDir()
+			planPath, aclsPath := writeWildcardDenyFixtures(t, dir, "User:eve")
+
+			err := deny.Generate(deny.Options{
+				RunDir:           dir,
+				PlanPath:         planPath,
+				ACLsPath:         aclsPath,
+				Verify:           []verify.Result{},
+				Principals:       []string{"User:eve"},
+				BootstrapServers: "kafka.example.com:9093",
+				MDSURL:           raw,
+				MDSTokenFile:     dummyTokenFile(t, dir),
+			})
+			if err == nil {
+				t.Fatalf("expected error for --mds-url %q", raw)
+			}
+			if !strings.Contains(err.Error(), "--mds-url") {
+				t.Errorf("error should name --mds-url; got: %v", err)
+			}
+			if strings.Contains(err.Error(), "hunter2") {
+				t.Errorf("error leaks the embedded password: %v", err)
+			}
+			for _, name := range []string{"runtime.env", "delete-deny-acls.sh"} {
+				if _, statErr := os.Stat(filepath.Join(dir, name)); statErr == nil {
+					t.Errorf("%s should not be written when --mds-url is rejected", name)
+				}
+			}
+		})
+	}
+}
+
 // TestGenerate_AcceptsUserPasswordAuth confirms the MDS-auth check
 // accepts the --mds-user + --mds-password-file path as an alternative
 // to --mds-token-file. Defends against an over-strict validator that

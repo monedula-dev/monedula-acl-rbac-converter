@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/monedula-dev/monedula-acl-rbac-converter/pkg/aclrbac/delete/common"
+	"github.com/monedula-dev/monedula-acl-rbac-converter/pkg/aclrbac/mds"
 	"github.com/monedula-dev/monedula-acl-rbac-converter/pkg/aclrbac/rundir"
 	"github.com/monedula-dev/monedula-acl-rbac-converter/pkg/aclrbac/types"
 	"github.com/monedula-dev/monedula-acl-rbac-converter/pkg/aclrbac/verify"
@@ -263,6 +264,14 @@ func validateRuntimeCredentials(opts Options) error {
 	// also break the runtime.env shell-quoting downstream.
 	if strings.TrimSpace(opts.MDSURL) == "" {
 		return fmt.Errorf("delete-deny-acls: --mds-url is required (used by delete-deny-one for the live SAFE_TO_REMOVE re-check, spec §4.4)")
+	}
+	// Same rules delete-deny-one's MDS client applies at execution time.
+	// Checked here because the URL is written into runtime.env and the
+	// script header below: embedded credentials must not land on disk, and
+	// a URL the client would refuse must not yield scripts that fail only
+	// when an operator runs them.
+	if err := mds.ValidateBaseURL(opts.MDSURL); err != nil {
+		return fmt.Errorf("delete-deny-acls: --mds-url: %w", err)
 	}
 	hasTokenFile := strings.TrimSpace(opts.MDSTokenFile) != ""
 	hasUserPass := strings.TrimSpace(opts.MDSUser) != "" && strings.TrimSpace(opts.MDSPasswordFile) != ""

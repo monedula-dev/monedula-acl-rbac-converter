@@ -8,7 +8,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/monedula-dev/monedula-acl-rbac-converter/pkg/aclrbac/log"
 	"github.com/monedula-dev/monedula-acl-rbac-converter/pkg/aclrbac/mds"
@@ -177,5 +179,88 @@ func TestClient_RefreshesTokenOn401(t *testing.T) {
 	}
 	if len(seen) != 2 || seen[0] != "Bearer old" || seen[1] != "Bearer fresh" {
 		t.Errorf("expected [Bearer old, Bearer fresh]; got %v", seen)
+	}
+}
+
+// TestNewClient_RejectsUnsafeBaseURL pins the --mds-url validation. The
+// client only ever talks to the base URL's origin, so anything that isn't a
+// plain http(s) host is refused up front: a missing scheme ("host:port"
+// parses as scheme "host"), non-HTTP schemes, embedded credentials (which
+// would otherwise surface in error messages and run-dir logs), and a
+// query/fragment that would ride along on every request.
+func TestNewClient_RejectsUnsafeBaseURL(t *testing.T) {
+	for _, raw := range []string{
+		"mds.example.com:8090",
+		"ftp://mds.example.com",
+		"file:///etc/passwd",
+		"https://",
+		"https://alice:hunter2@mds.example.com",
+		"alice:hunter2@mds.example.com:8090",             // no scheme: parses as scheme "alice"
+		"https://alice:hunter2@mds.example.com:notaport", // url.Parse error quotes its input
+		"https://mds.example.com/?redirect=http://evil",
+		"https://mds.example.com/#frag",
+	} {
+		_, err := mds.NewClient(mds.Config{URL: raw})
+		if err == nil {
+			t.Errorf("NewClient(%q): expected error", raw)
+			continue
+		}
+		if strings.Contains(err.Error(), "hunter2") {
+			t.Errorf("NewClient(%q): error leaks the embedded password: %v", raw, err)
+		}
+	}
+}
+
+func TestNewClient_AcceptsHTTPAndHTTPSBaseURLs(t *testing.T) {
+	for _, raw := range []string{
+		"http://mds:8090",
+		"https://mds.example.com",
+		"https://mds.example.com/base/",
+		"HTTPS://MDS.example.com:8090",
+	} {
+		if _, err := mds.NewClient(mds.Config{URL: raw}); err != nil {
+			t.Errorf("NewClient(%q): %v", raw, err)
+		}
+	}
+}
+
+// TestClient_RefusesRedirects pins that a 3xx from MDS is an error and the
+// redirect target is never contacted. net/http keeps the Authorization
+// header on a redirect to the same hostname on another port (both servers
+// here are 127.0.0.1), so following it would hand the bearer token to
+// whatever else listens on the MDS host. The refusal must also not be
+// retried as a transient failure.
+func TestClient_RefusesRedirects(t *testing.T) {
+	var targetHits atomic.Int32
+	target := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		targetHits.Add(1)
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer target.Close()
+
+	var originHits atomic.Int32
+	origin := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		originHits.Add(1)
+		http.Redirect(w, r, target.URL+r.URL.Path, http.StatusTemporaryRedirect)
+	}))
+	defer origin.Close()
+
+	cl, err := mds.NewClient(mds.Config{URL: origin.URL, Token: "secret-bearer", MaxRetries: 3, RetryBase: time.Nanosecond})
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := cl.Get("/security/1.0/roles/DeveloperRead")
+	if err == nil {
+		resp.Body.Close()
+		t.Fatal("expected an error for a redirect response")
+	}
+	if !strings.Contains(err.Error(), "redirect") {
+		t.Errorf("error should explain the refused redirect; got %v", err)
+	}
+	if n := targetHits.Load(); n != 0 {
+		t.Errorf("redirect target was contacted %d time(s)", n)
+	}
+	if n := originHits.Load(); n != 1 {
+		t.Errorf("refused redirect should not be retried; origin saw %d requests", n)
 	}
 }
