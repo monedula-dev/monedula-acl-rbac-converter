@@ -151,7 +151,7 @@ bindings with strong safety guarantees: dry-run defaults, run-directory
 audit trail, script-first deletion, effective-access verification, and
 DENY-removal safety checks.
 
-The recommended migration workflow (matches the README checklist):
+The recommended migration workflow:
 
   1. discover     bootstrap a scopes.yaml from MDS
   2. extract      read ACLs from a source into acls.json
@@ -164,5 +164,4 @@ The recommended migration workflow (matches the README checklist):
                   generate a separate, multi-gated script to remove them once
                   you have confirmed access no longer depends on them
 
-See https://github.com/monedula-dev/monedula-acl-rbac-converter for the
-full spec and README.`
+Documentation: https://monedula.dev/flock/docs/acl-rbac-converter/`

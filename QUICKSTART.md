@@ -113,4 +113,4 @@ When you're ready to point at production:
 5. `delete-acls` to emit a deletion script. Inspect it, run it
    piece by piece if needed.
 
-See the [README](README.md) for the full reference.
+The [documentation](https://monedula.dev/flock/docs/acl-rbac-converter/) covers every command, flag and config file.

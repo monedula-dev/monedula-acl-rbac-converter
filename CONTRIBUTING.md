@@ -67,8 +67,10 @@ Separate body lines explain the why.
 
 - Open against `main`.
 - Include or update tests for any behavior change.
-- For user-facing changes, update `README.md` and add a line under
-  `## [Unreleased]` in `CHANGELOG.md`.
+- For user-facing changes, add a line under `## [Unreleased]` in
+  `CHANGELOG.md`. The user documentation lives at
+  [monedula.dev](https://monedula.dev/flock/docs/acl-rbac-converter/), not
+  in this repository; say in the pull request what it needs to change.
 - One reviewer approval before merge.
 
 ## Releases

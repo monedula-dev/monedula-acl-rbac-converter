@@ -25,10 +25,10 @@ Before tagging, on a clean working tree of `main`:
         CONTRIBUTING.md CHANGELOG.md
    ```
    The `v` is optional in the pattern because several references omit it.
-   The README install snippet (`VERSION=...`), the CHANGELOG headings, the
-   verification example archive (`monedula-acl-rbac_<ver>_<os>_<arch>...`),
-   SECURITY.md's supported release line (`X.Y.x`), and the cosign
-   certificate-identity regex should all agree.
+   The CHANGELOG headings and SECURITY.md's supported release line
+   (`X.Y.x`) should agree. The install snippet (`VERSION=...`) and the
+   verification example archive live in the website docs, which move to the
+   new version after publishing (see below).
 4. **Run the local gate.**
    ```sh
    make lint
@@ -92,9 +92,22 @@ the GitHub UI as a draft. Before publishing:
    into the release body.
 4. **Publish** the release.
 
-The README's "Verifying a release" section is what users will follow
-afterwards. Sanity-check that the cosign verification example still resolves
-on the published artifacts before announcing the release.
+## Post-publish: move the docs to the new version
+
+The user documentation, including the
+[install page](https://monedula.dev/flock/docs/acl-rbac-converter/how-to/install/)
+that users follow to verify a release, lives in the `monedula-website`
+repository. Move it to the new version there:
+
+- `version` in `src/flock/tools.ts` and in
+  `src/flock/reference/data/acl-rbac-converter.cli.json`;
+- the vendored schemas under `vendor/flock-sources/acl-rbac-converter/<version>/`,
+  copied as that folder's README describes;
+- the version named in the docs pages, including the install page's
+  `VERSION` and archive examples and the examples' `tree/vX.Y.Z` links.
+
+Sanity-check that the install page's cosign verification example still
+resolves on the published artifacts before announcing the release.
 
 ## Hotfix / patch release
 

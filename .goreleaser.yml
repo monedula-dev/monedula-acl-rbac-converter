@@ -100,6 +100,6 @@ release:
   draft: true
   header: |
     Full release notes: see the
-    [CHANGELOG]({{ .GitURL }}/blob/{{ .Tag }}/CHANGELOG.md) and the
-    [README]({{ .GitURL }}/blob/{{ .Tag }}/README.md#install) for install
-    and verification (cosign + SBOM) instructions.
+    [CHANGELOG]({{ .GitURL }}/blob/{{ .Tag }}/CHANGELOG.md), and the
+    [install page](https://monedula.dev/flock/docs/acl-rbac-converter/how-to/install/)
+    for install and verification (cosign + SBOM) instructions.

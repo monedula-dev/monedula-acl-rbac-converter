@@ -6,7 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_Nothing yet._
+### Changed
+
+- **The documentation moved to
+  [monedula.dev](https://monedula.dev/flock/docs/acl-rbac-converter/).** The
+  README is now a short landing page that links to it, and the root
+  `--help`, QUICKSTART.md and the release notes point there instead of to
+  README sections.
 
 ## [0.20.0] - 2026-11-12
 
