@@ -18,7 +18,7 @@ project's integration tests use (`internal/mdstest`), ported to compose.
 | Service | Image | Role |
 |---|---|---|
 | `openldap` | `osixia/openldap:1.5.0` | MDS's identity store (holds the `mds` admin user) |
-| `kafka` | `confluentinc/cp-server:8.2.1` | KRaft broker **+ MDS/RBAC** on `:8090` |
+| `kafka` | `confluentinc/cp-server:8.4.1` | KRaft broker **+ MDS/RBAC** on `:8090` |
 | `converter` | built from this repo | the `monedula-acl-rbac` CLI, on the same network |
 
 ## The scenario
@@ -90,4 +90,4 @@ Artifacts land in [`out/`](out/) (and committed reference copies are in
 - [`secrets/`](secrets/) holds **throwaway** local-dev credentials (an MDS token
   keypair, the LDAP seed, the `mds` password) — see [`secrets/README.md`](secrets/README.md).
 - This mirrors `tests/e2e/complex_pipeline_test.go`, which runs the same flow
-  across CP 7.9 (ZooKeeper) and CP 8.2 (KRaft) in CI.
+  across CP 7.9 (ZooKeeper), CP 8.2 and CP 8.4 (KRaft) in CI.

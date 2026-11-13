@@ -37,10 +37,12 @@ type CPSpec struct {
 	KRaft   bool // true => KRaft (CP 8.x), false => ZooKeeper (CP 7.x)
 }
 
-// CPSpecs is the version matrix the real-MDS tests run against.
+// CPSpecs is the version matrix the real-MDS tests run against. Each CP line
+// ships one Apache Kafka minor: 7.9 = AK 3.9, 8.2 = AK 4.2, 8.4 = AK 4.4.
 var CPSpecs = []CPSpec{
 	{Name: "cp7.9-zookeeper", Version: "7.9.7", KRaft: false},
 	{Name: "cp8.2-kraft", Version: "8.2.1", KRaft: true},
+	{Name: "cp8.4-kraft", Version: "8.4.1", KRaft: true},
 }
 
 // Stack is a running MDS (and its backing cp-server broker) under one version.

@@ -47,11 +47,7 @@ func TestLiveExtract_AgainstCpKafka(t *testing.T) {
 	defer cancel()
 
 	c, err := kafka.Run(ctx,
-		// Bump in lockstep with Confluent Platform releases; current
-		// stable line is 7.9.x. The integration suite is opt-in (manual
-		// dispatch / `run-integration` label), so the cost of a missed
-		// bump is low.
-		"confluentinc/cp-kafka:7.9.7",
+		cpKafkaImage,
 		kafka.WithClusterID("test-cluster"),
 		// Enable the StandardAuthorizer so that CreateACLs / DescribeACLs
 		// work. Without this Kafka returns SECURITY_DISABLED for all ACL RPCs

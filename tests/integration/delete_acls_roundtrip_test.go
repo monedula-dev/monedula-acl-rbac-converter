@@ -24,14 +24,14 @@ import (
 	"github.com/monedula-dev/monedula-acl-rbac-converter/pkg/aclrbac/cli"
 )
 
-// startCpKafkaContainer brings up confluentinc/cp-kafka:7.9.7 in
-// KRaft mode with StandardAuthorizer and ANONYMOUS-as-superuser, the
+// startCpKafkaContainer brings up cpKafkaImage in KRaft mode with
+// StandardAuthorizer and ANONYMOUS-as-superuser, the
 // same authorization shape as startCpKafka but also returns the
 // underlying *kafka.KafkaContainer so callers can Exec / CopyToContainer.
 func startCpKafkaContainer(ctx context.Context, t *testing.T) (*kafka.KafkaContainer, []string) {
 	t.Helper()
 	c, err := kafka.Run(ctx,
-		"confluentinc/cp-kafka:7.9.7",
+		cpKafkaImage,
 		kafka.WithClusterID("integration-cluster"),
 		tcgo.WithEnv(map[string]string{
 			"KAFKA_AUTHORIZER_CLASS_NAME":          "org.apache.kafka.metadata.authorizer.StandardAuthorizer",
@@ -151,8 +151,8 @@ func TestRealBroker_DeleteACLs_RoundTrip(t *testing.T) {
 	t.Logf("cp-kafka brokers (external): %v", brokers)
 
 	// Probe: confirm kafka-acls is on PATH inside the container and
-	// dump KAFKA_LISTENERS so a future diff makes the assumption
-	// explicit when cp-kafka 8.x lands. The cp-kafka image lacks a
+	// dump KAFKA_LISTENERS so an image bump that changes the listener
+	// layout shows up in the log. The cp-kafka image lacks a
 	// 'which' binary in $PATH; use 'command -v' via sh, which is a
 	// POSIX builtin and works on every cp-kafka tag we ship against.
 	if out, code := execInContainer(ctx, t, c, []string{"sh", "-c", "command -v kafka-acls"}); code != 0 {
