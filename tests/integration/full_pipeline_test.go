@@ -22,6 +22,13 @@ import (
 	"github.com/monedula-dev/monedula-acl-rbac-converter/pkg/aclrbac/cli"
 )
 
+// cpKafkaImage is the plain cp-kafka broker the non-MDS integration tests run
+// against: the latest Confluent Platform line (CP 8.4 = Apache Kafka 4.4).
+// Bump in lockstep with Confluent Platform releases. The integration suite is
+// opt-in (manual dispatch / `run-integration` label), so the cost of a missed
+// bump is low. The real-MDS tests use their own matrix, mdstest.CPSpecs.
+const cpKafkaImage = "confluentinc/cp-kafka:8.4.1"
+
 // startCpKafka brings up a confluentinc/cp-kafka container with the
 // StandardAuthorizer enabled and the anonymous principal as
 // superuser, so DescribeACLs / CreateACLs work without SASL. Returns
@@ -29,7 +36,7 @@ import (
 func startCpKafka(ctx context.Context, t *testing.T) (brokers []string, terminate func()) {
 	t.Helper()
 	c, err := kafka.Run(ctx,
-		"confluentinc/cp-kafka:7.9.7",
+		cpKafkaImage,
 		kafka.WithClusterID("integration-cluster"),
 		tcgo.WithEnv(map[string]string{
 			"KAFKA_AUTHORIZER_CLASS_NAME":          "org.apache.kafka.metadata.authorizer.StandardAuthorizer",

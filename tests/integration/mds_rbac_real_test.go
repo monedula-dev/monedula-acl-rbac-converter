@@ -10,11 +10,12 @@
 // the bad capability probe, the double-escaped path all fail against a real
 // server.
 //
-// The same client is exercised against two Confluent Platform lines:
-//   - 7.9.x: ZooKeeper-backed.
-//   - 8.2.x: KRaft (ZooKeeper removed in CP 8.0).
+// The same client is exercised against three Confluent Platform lines:
+//   - 7.9.x: ZooKeeper-backed (Apache Kafka 3.9).
+//   - 8.2.x: KRaft, Apache Kafka 4.2 (ZooKeeper removed in CP 8.0).
+//   - 8.4.x: KRaft, Apache Kafka 4.4.
 //
-// Both speak the identical MDS REST contract; only the broker bring-up differs.
+// All speak the identical MDS REST contract; only the broker bring-up differs.
 // The Docker harness that stands the stack up lives in internal/mdstest. Heavy
 // (~3 containers, ~60-90s warm-up per version), so under -tags integration.
 package integration_test
